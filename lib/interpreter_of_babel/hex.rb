@@ -10,9 +10,11 @@ module InterpreterOfBabel
     require_relative "library"
     require_relative "wall"
 
+    FORMAT = "[a-z0-9]{1,3260}"
+
     parent_class Library
     child_class Wall
-    number_format(/\A[a-z0-9]{1,3260}\z/)
-    url_format(&:to_s)
+    number_format(/\A#{FORMAT}\z/o)
+    url_format lambda(&:to_s)
   end
 end

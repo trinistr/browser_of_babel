@@ -83,8 +83,14 @@ module InterpreterOfBabel
     # @raise [InvalidNumberError]
     # @raise [InvalidContainerError]
     def initialize(parent, number)
+      if parent && !self.class.parent_class
+        raise InvalidContainerError, "no parent expected", caller
+      end
+
       check_parent(parent)
       @parent = parent
+
+      raise InvalidNumberError, "no number expected, caller" if number && !self.class.number_format
 
       check_number(number)
       @number = number&.to_s
@@ -94,10 +100,10 @@ module InterpreterOfBabel
     # Order is page -> volume -> shelf -> wall -> hex -> library
     # @param levels [Integer]
     # @return [Container]
-    # @raise [ArgumntError] if +levels+ is not a non-negative integer
+    # @raise [ArgumentError] if +levels+ is not a non-negative integer
     def up(levels = 1)
-      raise ArgumntError, "levels must be an integer" unless levels.is_a?(integer)
-      raise ArgumntError, "levels must be non-negative" if levels.negative?
+      raise ArgumentError, "levels must be an integer" unless levels.is_a?(integer)
+      raise ArgumentError, "levels must be non-negative" if levels.negative?
 
       (levels.zero? || !parent) ? self : parent.up(levels - 1)
     end
@@ -151,10 +157,6 @@ module InterpreterOfBabel
     private
 
     def check_parent(parent)
-      if parent && !self.class.parent_class
-        raise InvalidContainerError, "no parent expected", caller
-      end
-
       return unless self.class.parent_class
       return if parent.is_a?(self.class.parent_class)
 
@@ -162,13 +164,17 @@ module InterpreterOfBabel
     end
 
     def check_number(number)
-      raise InvalidNumberError, "no number expected, caller" if number && !self.class.number_format
-
       return unless self.class.number_format
       return if self.class.number_format === number || self.class.number_format === number.to_s
 
+      begin
+        return if self.class.number_format === Integer(number, 10)
+      rescue ArgumentError
+        # ok, raise InvalidNumberError
+      end
+
       raise InvalidNumberError,
-            "number does not correspond to expected format for #{self.class}", caller
+            "number #{number} does not correspond to expected format for #{self.class}", caller
     end
   end
 end

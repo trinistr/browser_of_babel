@@ -2,7 +2,6 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in library_of_babel_interpeter.gemspec
 gemspec
 
 gem "debug", require: false

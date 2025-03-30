@@ -6,6 +6,7 @@ Dir["#{File.expand_path(__dir__)}/interpreter_of_babel/*"].each { require _1 }
 # @see https://libraryofbabel.info
 module InterpreterOfBabel
   class Error < StandardError; end
+
   # Container does not support this number.
   class InvalidNumberError < Error; end
   # Trying to go between library container levels incorrectly, e.g. from hex to shelf.
@@ -13,5 +14,6 @@ module InterpreterOfBabel
   # Trying to fill a container class-level setting with an invalid value.
   class InvalidSettingError < Error; end
 
-  LIBRARY_BASE = "https://libraryofbabel.info/book.cgi?"
+  # Interpreter encountered an invalid instruction.
+  class InvalidInstructionError < Error; end
 end

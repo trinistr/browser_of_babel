@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-require "net/http"
-require "nokogiri"
 require_relative "container"
+require_relative "page_content"
 
 module InterpreterOfBabel
   # Bottom-level container in the library.
   # Number is between 1 and 410.
-  # Contains 3200 characters.
+  # Contains 3200 characters:
+  #   - lowercase latin letters,
+  #   - digits,
+  #   - spaces,
+  #   - commas and periods.
   class Page < Container
     require_relative "volume"
 
@@ -24,13 +27,13 @@ module InterpreterOfBabel
     # Get the page's title (it's book title + number of the page).
     # @return [String]
     def title
-      html.title
+      content.title
     end
 
     # Get the page's contents as a blob of text.
     # @return [String]
-    def content
-      @content ||= html.css("pre#textblock").text.delete("\n")
+    def text
+      content.text
     end
 
     # Get text from the page.
@@ -41,14 +44,20 @@ module InterpreterOfBabel
     #   @param start [Integer]
     #   @param end [Integer]
     # @see String#[]
-    def [](...)
-      content.[](...)
+    def [](start_or_range, length = nil)
+      range =
+        if length
+          (start_or_range - 1)..(start_or_range + length - 1)
+        else
+          (start_or_range.begin - 1)..(start_or_range.end - 1)
+        end
+      text.[](range)
     end
 
     private
 
-    def html
-      @html ||= Nokogiri.HTML(Net::HTTP.get(URI(to_url)))
+    def content
+      @content ||= PageContent.new(self)
     end
   end
 end
