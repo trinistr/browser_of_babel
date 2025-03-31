@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "support/coverage_helper"
+
 require "browser_of_babel"
 
 RSpec.configure do |config|
@@ -12,4 +14,9 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.order = :random
+  Kernel.srand(config.seed)
+
+  config.formatter = (config.files_to_run.size > 1) ? :progress : :documentation
 end
