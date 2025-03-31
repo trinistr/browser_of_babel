@@ -11,12 +11,39 @@ module BrowserOfBabel
       # @return [Class, nil]
       attr_reader :child_class
 
+      # Convenience method to establish holarchy with current class as the root.
+      # Also redefines {#initialize} to have only one optional parameter for +number+,
+      # @example
+      #   # Holarchy with a single unnamed root.
+      #   class SolarSystem < Holotheca
+      #     holarchy Planet >> Continent >> Region
+      #   end
+      #   SolarSystem.new
+      # @example
+      #   # Holarchy with multiple named roots.
+      #   class Planet < Holotheca
+      #     holarchy Continent >> Region
+      #     number_format(/\A[α-ω]\z/)
+      #   end
+      #   Planet.new("χ")
+      # @param holotheca [Class]
+      # @return [Class] self
+      def holarchy(holotheca)
+        class_eval { def initialize(number = nil) = super(nil, number) }
+
+        # Due to how `.>>` works, it is not possible to reliably redefine the holarchy.
+        self >> Enumerator.produce(holotheca) { _1.parent_class }.find { _1.parent_class.nil? }
+
+        self
+      end
+
       # Define holarchy relationship where +other+ is a part of +self+.
       # @example
       #   Library >> Section >> Bookcase >> Book
       # @param other [Class] a subclass of Holotheca
       # @return [Class] +other+
       def >>(other)
+        raise ArgumentError, "must be called on a subclass of Holotheca" if self == Holotheca
         raise ArgumentError, "#{other} is not a Holotheca" unless other < Holotheca
 
         self.child_class = other
@@ -66,20 +93,12 @@ module BrowserOfBabel
       # Set parent holotheca class.
       # @param holotheca [Class]
       # @return [Class]
-      def parent_class=(holotheca)
-        raise ArgumentError, "invalid class #{holotheca}" unless holotheca < Holotheca
-
-        @parent_class = holotheca
-      end
+      attr_writer :parent_class
 
       # Set child holotheca class.
       # @param holotheca [Class]
       # @return [Class]
-      def child_class=(holotheca)
-        raise ArgumentError, "invalid class #{holotheca}" unless holotheca < Holotheca
-
-        @child_class = holotheca
-      end
+      attr_writer :child_class
     end
 
     # @return [Holotheca, nil]

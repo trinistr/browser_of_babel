@@ -10,12 +10,8 @@ require_relative "page"
 module BrowserOfBabel
   # Top-level holotheca, representing the whole Library of Babel.
   class Library < Holotheca
-    self >> Hex >> Wall >> Shelf >> Volume >> Page
+    holarchy Hex >> Wall >> Shelf >> Volume >> Page
 
     url_format ->(*) { "https://libraryofbabel.info/book.cgi?" }
-
-    def initialize
-      super(nil, nil)
-    end
   end
 end

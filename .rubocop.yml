@@ -7,7 +7,10 @@ plugins:
   - rubocop-rspec
   - rubocop-thread_safety
 
+# Class variables should only be modified during class loading.
 ThreadSafety/ClassInstanceVariable:
   Exclude:
-    # Class variables should only be modified during class loading.
+    - lib/browser_of_babel/holotheca.rb
+ThreadSafety/ClassAndModuleAttributes:
+  Exclude:
     - lib/browser_of_babel/holotheca.rb
