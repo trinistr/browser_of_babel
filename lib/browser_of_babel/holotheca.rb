@@ -115,7 +115,7 @@ module BrowserOfBabel
       @parent = parent
 
       check_number(number)
-      @number = number&.to_s
+      @number = -number.to_s if number
     end
 
     # (see .depth)
@@ -129,7 +129,7 @@ module BrowserOfBabel
     # @return [Holotheca]
     # @raise [ArgumentError] if +levels+ is not a non-negative integer
     def up(levels = 1)
-      raise ArgumentError, "levels must be an integer" unless levels.is_a?(integer)
+      raise ArgumentError, "levels must be an integer" unless levels.is_a?(Integer)
       raise ArgumentError, "levels must be non-negative" if levels.negative?
 
       (levels.zero? || !parent) ? self : parent.up(levels - 1)
@@ -147,18 +147,6 @@ module BrowserOfBabel
       self.class.child_class.new(self, number)
     end
 
-    # Get holothecas from the top level to this one.
-    # @return [Array<Holotheca>]
-    def path
-      ret = []
-      holotheca = self
-      while holotheca
-        ret << holotheca
-        holotheca = holotheca.parent
-      end
-      ret.reverse!
-    end
-
     # Go down several levels, following a string of +number+s.
     # @param numbers [Array<String, Integer>]
     # @raise [InvalidNumberError]
@@ -167,6 +155,12 @@ module BrowserOfBabel
       return self if !numbers || numbers.empty?
 
       down(numbers.shift).dig(*numbers)
+    end
+
+    # Get holothecas from the top level to this one.
+    # @return [Array<Holotheca>]
+    def path
+      Enumerator.produce(self) { _1.parent }.take_while(&:itself).reverse!
     end
 
     # Get string representation for use in URLs.
