@@ -79,6 +79,14 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
+  describe ".root" do
+    it "returns the root holotheca class" do
+      expect(primary.root).to be primary
+      expect(secondary.root).to be primary
+      expect(tertiary.root).to be primary
+    end
+  end
+
   describe ".number_format" do
     context "when called without an argument" do
       it "returns configured format checker" do
@@ -219,6 +227,18 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       expect(primus.depth).to eq 0
       expect(secundus.depth).to eq 1
       expect(tertius.depth).to eq 2
+    end
+  end
+
+  describe "#root" do
+    let(:primus) { primary.new }
+    let(:secundus) { secondary.new(primus, 50) }
+    let(:tertius) { tertiary.new(secundus, "txt") }
+
+    it "returns the root holotheca" do
+      expect(primus.root).to be primus
+      expect(secundus.root).to be primus
+      expect(tertius.root).to be primus
     end
   end
 

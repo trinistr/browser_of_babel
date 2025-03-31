@@ -29,13 +29,15 @@ module BrowserOfBabel
       # @example
       #   # Root can be included too!
       #   holarchy SolarSystem >> Planet >> Continent >> Region
+      # @note It is not possible to reliably redefine the holarchy after the first call.
       # @param holotheca [Class]
       # @return [Class] self
       def holarchy(holotheca)
         class_eval { def initialize(number = nil) = super(nil, number) }
 
-        # Due to how `.>>` works, it is not possible to reliably redefine the holarchy.
-        top = Enumerator.produce(holotheca) { _1.parent_class }.find { _1.parent_class.nil? }
+        # Due to how `.>>` works, parent and child classes can be messed up
+        # on redefinition of a holarchy, do not even try.
+        top = holotheca.root
         self >> top unless top == self
 
         self
@@ -56,7 +58,7 @@ module BrowserOfBabel
         other
       end
 
-      # Depth of this holotheca in the holarchy, starting from 0.
+      # Depth of this holotheca class in the holarchy, starting from 0.
       # @return [Integer]
       def depth
         if @parent_class
@@ -64,6 +66,12 @@ module BrowserOfBabel
         else
           0
         end
+      end
+
+      # Get root holotheca class for the holarchy.
+      # @return [Class]
+      def root
+        Enumerator.produce(self) { _1.parent_class }.find { _1.parent_class.nil? }
       end
 
       # Get or set format checker for the holotheca's number.
@@ -127,6 +135,12 @@ module BrowserOfBabel
       self.class.depth
     end
 
+    # Get the root holotheca.
+    # @return [Holotheca]
+    def root
+      @root ||= Enumerator.produce(self) { _1.parent }.find { _1.parent.nil? }
+    end
+
     # Go up +levels+ number of times.
     # There is no penalty for trying to escape from the top level.
     # @param levels [Integer]
@@ -164,16 +178,16 @@ module BrowserOfBabel
     # Get holothecas from the top level to this one.
     # @return [Array<Holotheca>]
     def path
-      Enumerator.produce(self) { _1.parent }.take_while(&:itself).reverse!
+      @path ||= Enumerator.produce(self) { _1.parent }.take_while(&:itself).reverse!
     end
 
-    # Get string representation for use in URLs.
+    # Get string representation for use in URIs.
     # @return [String]
     def to_url_part
       self.class.url_format.call(number)
     end
 
-    # Get string representation of the complete URL (down to this holotheca).
+    # Get string representation of the complete URI (down to this holotheca).
     # @return [String]
     def to_url
       path.map(&:to_url_part).join
@@ -189,6 +203,7 @@ module BrowserOfBabel
     end
 
     def check_number(number)
+      # Includes case of nil === nil.
       return if self.class.number_format === number
 
       raise InvalidNumberError,
