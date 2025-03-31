@@ -12,9 +12,6 @@ module BrowserOfBabel
   #   - spaces,
   #   - commas and periods.
   class Page < Holotheca
-    require_relative "volume"
-
-    parent_class Volume
     number_format(1..410)
     url_format ->(page) { ":#{page}" }
 

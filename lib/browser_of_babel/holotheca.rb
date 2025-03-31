@@ -1,38 +1,37 @@
 # frozen_string_literal: true
 
 module BrowserOfBabel
-  # Base library holotheca class.
+  # Base holotheca class.
+  # From *holon* (Greek holos (ὅλος) meaning 'whole', with the suffix -on which denotes a part)
+  # and *theca* (Greek theke (θήκη) meaning 'case, sheath, sleeve' — a container).
   class Holotheca
     class << self
-      MUTEX = Mutex.new
+      # @return [Class, nil]
+      attr_reader :parent_class
+      # @return [Class, nil]
+      attr_reader :child_class
 
-      # Get or set parent holotheca class.
-      # @overload parent_class
-      #   @return [Holotheca, nil]
-      # @overload parent_class(holotheca)
-      #   @param holotheca [Holotheca]
-      #   @return [void]
-      def parent_class(holotheca = nil)
-        mutex.synchronize do
-          return @parent unless holotheca
-          raise InvalidSettingError, "invalid class #{holotheca}" if holotheca.is_a?(Holotheca)
+      # Define holarchy relationship where +other+ is a part of +self+.
+      # @example
+      #   Library >> Section >> Bookcase >> Book
+      # @param other [Class] a subclass of Holotheca
+      # @return [Class] +other+
+      def >>(other)
+        raise ArgumentError, "#{other} is not a Holotheca" unless other < Holotheca
 
-          @parent = holotheca
-        end
+        self.child_class = other
+        other.parent_class = self
+
+        other
       end
 
-      # Get or set child holotheca class.
-      # @overload child_class
-      #   @return [Holotheca, nil]
-      # @overload child_class(holotheca)
-      #   @param holotheca [Holotheca]
-      #   @return [void]
-      def child_class(holotheca = nil)
-        mutex.synchronize do
-          return @child unless holotheca
-          raise InvalidSettingError, "invalid class #{holotheca}" if holotheca.is_a?(Holotheca)
-
-          @child = holotheca
+      # Depth of this holotheca in the holarchy, starting from 0.
+      # @return [Integer]
+      def depth
+        if @parent_class
+          @depth ||= @parent_class.depth + 1
+        else
+          0
         end
       end
 
@@ -43,12 +42,10 @@ module BrowserOfBabel
       #   @param format [#===]
       #   @return [void]
       def number_format(format = nil)
-        mutex.synchronize do
-          return @number_format unless format
-          raise InvalidSettingError, "invalid checker #{format}" unless format.respond_to?(:===)
+        return @number_format unless format
+        raise ArgumentError, "invalid checker #{format}" unless format.respond_to?(:===)
 
-          @number_format = format
-        end
+        @number_format = format
       end
 
       # Get or set string formatter for URLs.
@@ -58,24 +55,36 @@ module BrowserOfBabel
       #   @param format [#call]
       #   @return [void]
       def url_format(format = nil)
-        mutex.synchronize do
-          return @url_format unless format
-          raise InvalidSettingError, "invalid formatter #{format}" unless format.respond_to?(:call)
+        return @url_format unless format
+        raise ArgumentError, "invalid formatter #{format}" unless format.respond_to?(:call)
 
-          @url_format = format
-        end
+        @url_format = format
       end
 
-      private
+      protected
 
-      def mutex
-        MUTEX
+      # Set parent holotheca class.
+      # @param holotheca [Class]
+      # @return [Class]
+      def parent_class=(holotheca)
+        raise ArgumentError, "invalid class #{holotheca}" unless holotheca < Holotheca
+
+        @parent_class = holotheca
+      end
+
+      # Set child holotheca class.
+      # @param holotheca [Class]
+      # @return [Class]
+      def child_class=(holotheca)
+        raise ArgumentError, "invalid class #{holotheca}" unless holotheca < Holotheca
+
+        @child_class = holotheca
       end
     end
 
     # @return [Holotheca, nil]
     attr_reader :parent
-    # @return [String]
+    # @return [String, nil]
     attr_reader :number
 
     # @param parent [Holotheca] must be an instance of {.parent_class}
@@ -83,22 +92,20 @@ module BrowserOfBabel
     # @raise [InvalidNumberError]
     # @raise [InvalidHolothecaError]
     def initialize(parent, number)
-      if parent && !self.class.parent_class
-        raise InvalidHolothecaError, "no parent expected", caller
-      end
-
       check_parent(parent)
       @parent = parent
-
-      raise InvalidNumberError, "no number expected, caller" if number && !self.class.number_format
 
       check_number(number)
       @number = number&.to_s
     end
 
+    # (see .depth)
+    def depth
+      self.class.depth
+    end
+
     # Go up +levels+ number of times.
-    # Order is page -> volume -> shelf -> wall -> hex -> library.
-    # There is no penalty for trying to escape the library.
+    # There is no penalty for trying to escape from the top level.
     # @param levels [Integer]
     # @return [Holotheca]
     # @raise [ArgumentError] if +levels+ is not a non-negative integer
@@ -110,8 +117,7 @@ module BrowserOfBabel
     end
 
     # Go down a level to holotheca called +number+.
-    # Order is library -> hex -> wall -> shelf -> volume -> page.
-    # It is not possible to go below a page.
+    # It is an error to go below the lowest level.
     # @param number [String, Integer]
     # @return [Holotheca]
     # @raise [InvalidNumberError]
@@ -159,21 +165,14 @@ module BrowserOfBabel
     private
 
     def check_parent(parent)
-      return unless self.class.parent_class
-      return if parent.is_a?(self.class.parent_class)
+      # Includes case of nil === nil.
+      return if self.class.parent_class === parent
 
       raise InvalidHolothecaError, "#{parent} is not a #{self.class.parent_class}", caller
     end
 
     def check_number(number)
-      return unless self.class.number_format
-      return if self.class.number_format === number || self.class.number_format === number.to_s
-
-      begin
-        return if self.class.number_format === Integer(number, 10)
-      rescue ArgumentError
-        # ok, raise InvalidNumberError
-      end
+      return if self.class.number_format === number
 
       raise InvalidNumberError,
             "number #{number} does not correspond to expected format for #{self.class}", caller

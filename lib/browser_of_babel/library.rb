@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 require_relative "holotheca"
+require_relative "hex"
+require_relative "wall"
+require_relative "shelf"
+require_relative "volume"
+require_relative "page"
 
 module BrowserOfBabel
   # Top-level holotheca, representing the whole Library of Babel.
   class Library < Holotheca
-    require_relative "hex"
+    self >> Hex >> Wall >> Shelf >> Volume >> Page
 
-    child_class Hex
     url_format ->(*) { "https://libraryofbabel.info/book.cgi?" }
 
     def initialize

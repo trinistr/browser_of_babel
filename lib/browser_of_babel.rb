@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
-Dir["#{File.expand_path(__dir__)}/browser_of_babel/*"].each { require _1 }
+require_relative "browser_of_babel/version"
+require_relative "browser_of_babel/library"
+require_relative "browser_of_babel/finder"
 
-# Browser and interpter for Library of Babel.
+# Browser for Library of Babel.
 # @see https://libraryofbabel.info
 module BrowserOfBabel
   class Error < StandardError; end
@@ -11,6 +13,4 @@ module BrowserOfBabel
   class InvalidNumberError < Error; end
   # Trying to go between library holotheca levels incorrectly, e.g. from hex to shelf.
   class InvalidHolothecaError < Error; end
-  # Trying to fill a holotheca class-level setting with an invalid value.
-  class InvalidSettingError < Error; end
 end
