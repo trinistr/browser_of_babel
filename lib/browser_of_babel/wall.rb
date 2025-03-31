@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 
-module InterpreterOfBabel
-  # Second-level container in the library.
+module BrowserOfBabel
+  # Second-level holotheca in the library.
   # Number is between 1 and 4.
   # Contains 5 shelves.
-  class Wall < Container
+  class Wall < Holotheca
     require_relative "hex"
     require_relative "shelf"
 

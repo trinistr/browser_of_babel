@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 require_relative "page_content"
 
-module InterpreterOfBabel
-  # Bottom-level container in the library.
+module BrowserOfBabel
+  # Bottom-level holotheca in the library.
   # Number is between 1 and 410.
   # Contains 3200 characters:
   #   - lowercase latin letters,
   #   - digits,
   #   - spaces,
   #   - commas and periods.
-  class Page < Container
+  class Page < Holotheca
     require_relative "volume"
 
     parent_class Volume

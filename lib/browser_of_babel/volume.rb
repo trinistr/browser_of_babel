@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 
-module InterpreterOfBabel
-  # Fourth-level container in the library.
+module BrowserOfBabel
+  # Fourth-level holotheca in the library.
   # Number is between 1 and 32.
   # Contains 410 pages.
-  class Volume < Container
+  class Volume < Holotheca
     require_relative "shelf"
     require_relative "page"
 

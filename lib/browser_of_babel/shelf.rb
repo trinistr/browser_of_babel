@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 
-module InterpreterOfBabel
-  # Third-level container in the library.
+module BrowserOfBabel
+  # Third-level holotheca in the library.
   # Number is between 1 and 5.
   # Contains 32 volumes.
-  class Shelf < Container
+  class Shelf < Holotheca
     require_relative "wall"
     require_relative "volume"
 

@@ -3,7 +3,7 @@
 require "net/http"
 require "nokogiri"
 
-module InterpreterOfBabel
+module BrowserOfBabel
   # Proxy class to get page's content from the actual library.
   class PageContent
     # @param page [Page]

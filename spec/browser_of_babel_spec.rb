@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe InterpreterOfBabel do
+RSpec.describe BrowserOfBabel do
   it "has a version number" do
-    expect(InterpreterOfBabel::VERSION).not_to be nil
+    expect(BrowserOfBabel::VERSION).not_to be nil
   end
 
   it "does something useful" do

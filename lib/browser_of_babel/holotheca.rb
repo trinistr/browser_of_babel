@@ -1,42 +1,42 @@
 # frozen_string_literal: true
 
-module InterpreterOfBabel
-  # Base library container class.
-  class Container
+module BrowserOfBabel
+  # Base library holotheca class.
+  class Holotheca
     class << self
       MUTEX = Mutex.new
 
-      # Get or set parent container class.
+      # Get or set parent holotheca class.
       # @overload parent_class
-      #   @return [Container, nil]
-      # @overload parent_class(container)
-      #   @param container [Container]
+      #   @return [Holotheca, nil]
+      # @overload parent_class(holotheca)
+      #   @param holotheca [Holotheca]
       #   @return [void]
-      def parent_class(container = nil)
+      def parent_class(holotheca = nil)
         mutex.synchronize do
-          return @parent unless container
-          raise InvalidSettingError, "invalid class #{container}" if container.is_a?(Container)
+          return @parent unless holotheca
+          raise InvalidSettingError, "invalid class #{holotheca}" if holotheca.is_a?(Holotheca)
 
-          @parent = container
+          @parent = holotheca
         end
       end
 
-      # Get or set child container class.
+      # Get or set child holotheca class.
       # @overload child_class
-      #   @return [Container, nil]
-      # @overload child_class(container)
-      #   @param container [Container]
+      #   @return [Holotheca, nil]
+      # @overload child_class(holotheca)
+      #   @param holotheca [Holotheca]
       #   @return [void]
-      def child_class(container = nil)
+      def child_class(holotheca = nil)
         mutex.synchronize do
-          return @child unless container
-          raise InvalidSettingError, "invalid class #{container}" if container.is_a?(Container)
+          return @child unless holotheca
+          raise InvalidSettingError, "invalid class #{holotheca}" if holotheca.is_a?(Holotheca)
 
-          @child = container
+          @child = holotheca
         end
       end
 
-      # Get or set format checker for the container's number.
+      # Get or set format checker for the holotheca's number.
       # @overload number_format
       #   @return [#===]
       # @overload number_format(format)
@@ -54,7 +54,7 @@ module InterpreterOfBabel
       # Get or set string formatter for URLs.
       # @overload url_format
       #   @return [#call]
-      # @overload url_format(container)
+      # @overload url_format(holotheca)
       #   @param format [#call]
       #   @return [void]
       def url_format(format = nil)
@@ -73,18 +73,18 @@ module InterpreterOfBabel
       end
     end
 
-    # @return [Container, nil]
+    # @return [Holotheca, nil]
     attr_reader :parent
     # @return [String]
     attr_reader :number
 
-    # @param parent [Container] must be an instance of {.parent_class}
+    # @param parent [Holotheca] must be an instance of {.parent_class}
     # @param number [String, Integer] will be stringified automatically
     # @raise [InvalidNumberError]
-    # @raise [InvalidContainerError]
+    # @raise [InvalidHolothecaError]
     def initialize(parent, number)
       if parent && !self.class.parent_class
-        raise InvalidContainerError, "no parent expected", caller
+        raise InvalidHolothecaError, "no parent expected", caller
       end
 
       check_parent(parent)
@@ -97,9 +97,10 @@ module InterpreterOfBabel
     end
 
     # Go up +levels+ number of times.
-    # Order is page -> volume -> shelf -> wall -> hex -> library
+    # Order is page -> volume -> shelf -> wall -> hex -> library.
+    # There is no penalty for trying to escape the library.
     # @param levels [Integer]
-    # @return [Container]
+    # @return [Holotheca]
     # @raise [ArgumentError] if +levels+ is not a non-negative integer
     def up(levels = 1)
       raise ArgumentError, "levels must be an integer" unless levels.is_a?(integer)
@@ -108,34 +109,35 @@ module InterpreterOfBabel
       (levels.zero? || !parent) ? self : parent.up(levels - 1)
     end
 
-    # Get containers from the top level to this one.
-    # @return [Array<Container>]
-    def path
-      ret = []
-      level = self
-      while level
-        ret.unshift(level)
-        level = level.parent
-      end
-      ret
-    end
-
-    # Go down a level to container called +number+.
-    # Order is library -> hex -> wall -> shelf -> volume -> page
+    # Go down a level to holotheca called +number+.
+    # Order is library -> hex -> wall -> shelf -> volume -> page.
+    # It is not possible to go below a page.
     # @param number [String, Integer]
-    # @return [Container]
+    # @return [Holotheca]
     # @raise [InvalidNumberError]
-    # @raise [InvalidContainerError]
+    # @raise [InvalidHolothecaError]
     def down(number)
-      raise InvalidContainerError, "nowhere to go down" unless self.class.child_class
+      raise InvalidHolothecaError, "nowhere to go down" unless self.class.child_class
 
       self.class.child_class.new(self, number)
+    end
+
+    # Get holothecas from the top level to this one.
+    # @return [Array<Holotheca>]
+    def path
+      ret = []
+      holotheca = self
+      while holotheca
+        ret << holotheca
+        holotheca = holotheca.parent
+      end
+      ret.reverse!
     end
 
     # Go down several levels, following a string of +number+s.
     # @param numbers [Array<String, Integer>]
     # @raise [InvalidNumberError]
-    # @raise [InvalidContainerError]
+    # @raise [InvalidHolothecaError]
     def dig(*numbers)
       return self if !numbers || numbers.empty?
 
@@ -148,7 +150,7 @@ module InterpreterOfBabel
       self.class.url_format.call(number)
     end
 
-    # Get string representation of the complete URL (down to this container).
+    # Get string representation of the complete URL (down to this holotheca).
     # @return [String]
     def to_url
       path.map(&:to_url_part).join
@@ -160,7 +162,7 @@ module InterpreterOfBabel
       return unless self.class.parent_class
       return if parent.is_a?(self.class.parent_class)
 
-      raise InvalidContainerError, "#{parent} is not a #{self.class.parent_class}", caller
+      raise InvalidHolothecaError, "#{parent} is not a #{self.class.parent_class}", caller
     end
 
     def check_number(number)

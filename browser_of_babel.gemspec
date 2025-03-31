@@ -1,25 +1,23 @@
 # frozen_string_literal: true
 
-require_relative "lib/interpreter_of_babel/version"
+require_relative "lib/browser_of_babel/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "interpreter_of_babel"
-  spec.version = InterpreterOfBabel::VERSION
+  spec.name = "browser_of_babel"
+  spec.version = BrowserOfBabel::VERSION
   spec.authors = ["Alexandr Bulancov"]
   spec.email = ["6594487+trinistr@users.noreply.github.com"]
 
-  spec.summary = "TODO: Write a short summary, because RubyGems requires one."
-  spec.description = "TODO: Write a longer description or delete this line."
-  spec.homepage = "https://github.com/trinistr/interpreter_of_babel"
+  spec.summary = "A programmatic way to interact with the Library of Babel"
+  # spec.description = "TODO: Write a longer description or delete this line."
+  spec.homepage = "https://github.com/trinistr/browser_of_babel"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  # spec.metadata["source_code_uri"] = "TODO: Put your gem's public repo URL here."
+  # spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/CHANGELOG.md"
 
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
   spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
@@ -37,4 +35,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "nokogiri", "~> 1.0"
+  spec.add_dependency "net-http", "~> 0.6"
 end

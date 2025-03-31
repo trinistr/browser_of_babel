@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 
-module InterpreterOfBabel
-  # Top-level container, representing the whole Library of Babel.
-  class Library < Container
+module BrowserOfBabel
+  # Top-level holotheca, representing the whole Library of Babel.
+  class Library < Holotheca
     require_relative "hex"
 
     child_class Hex

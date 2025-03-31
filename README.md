@@ -1,8 +1,8 @@
-# InterpreterOfBabel
+# BrowserOfBabel
 
-TODO: Delete this and the text below, and describe your gem
+A programmatic way to interact with the [Library of Babel](https://libraryofbabel.info).
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/interpreter_of_babel`. To experiment with that code, run `bin/console` for an interactive prompt.
+**This project is not affiliated in any way with Library of Babel or Jonathan Basile.**
 
 ## Installation
 
@@ -32,7 +32,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/trinistr/interpreter_of_babel.
+Bug reports and pull requests are welcome on GitHub at https://github.com/trinistr/browser_of_babel.
 
 ## License
 

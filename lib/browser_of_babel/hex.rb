@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "container"
+require_relative "holotheca"
 
-module InterpreterOfBabel
-  # First-level container in the library.
+module BrowserOfBabel
+  # First-level holotheca in the library.
   # Number is a combination of lowercase (latin) letters and (arabic) digits up to 3260 long.
   # Contains 4 walls.
-  class Hex < Container
+  class Hex < Holotheca
     require_relative "library"
     require_relative "wall"
 

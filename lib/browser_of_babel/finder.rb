@@ -2,7 +2,7 @@
 
 require_relative "library"
 
-module InterpreterOfBabel
+module BrowserOfBabel
   # Finds correct page from a text reference.
   class Finder
     LEVEL_OF_PAGE = 5
@@ -13,7 +13,7 @@ module InterpreterOfBabel
     #   # => hex 2ab, wall 2, shelf 4, volume 16, page 121
     # @param reference [String]
     # @param separator [String]
-    # @return [Container]
+    # @return [Holotheca]
     def call(reference, separator = ".")
       numbers = reference.split(separator)
       raise ArgumentError, "reference contains too many numbers" if numbers.size > LEVEL_OF_PAGE
