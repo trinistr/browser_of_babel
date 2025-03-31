@@ -26,13 +26,17 @@ module BrowserOfBabel
       #     number_format(/\A[α-ω]\z/)
       #   end
       #   Planet.new("χ")
+      # @example
+      #   # Root can be included too!
+      #   holarchy SolarSystem >> Planet >> Continent >> Region
       # @param holotheca [Class]
       # @return [Class] self
       def holarchy(holotheca)
         class_eval { def initialize(number = nil) = super(nil, number) }
 
         # Due to how `.>>` works, it is not possible to reliably redefine the holarchy.
-        self >> Enumerator.produce(holotheca) { _1.parent_class }.find { _1.parent_class.nil? }
+        top = Enumerator.produce(holotheca) { _1.parent_class }.find { _1.parent_class.nil? }
+        self >> top unless top == self
 
         self
       end

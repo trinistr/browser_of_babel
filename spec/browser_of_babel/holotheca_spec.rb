@@ -48,6 +48,11 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       expect { described_class >> primary }.to raise_error ArgumentError
       expect { primary >> described_class }.to raise_error ArgumentError
     end
+
+    it "allows to mention root itself" do
+      expect { primary.holarchy primary >> secondary >> tertiary }.not_to raise_error
+      expect(primary.parent_class).to be nil
+    end
   end
 
   describe ".parent_class" do
