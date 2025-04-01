@@ -213,8 +213,8 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     let(:holotheca) { secondary.new(primary.new, num) }
     let(:num) { rand(1..100) }
 
-    it "returns the number as a String" do
-      expect(number).to eq num.to_s
+    it "returns the number" do
+      expect(number).to eq num
     end
   end
 
@@ -297,7 +297,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       it "creates a new child holotheca with specified number" do
         expect(downer).to be_a secondary
         expect(downer.parent).to be primus
-        expect(downer.number).to eq number.to_s
+        expect(downer.number).to eq number
       end
     end
 
@@ -329,7 +329,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       it "creates a line of holothecas" do
         expect(digged).to be_a tertiary
         expect(digged.number).to eq extension
-        expect(digged.parent.number).to eq number.to_s
+        expect(digged.parent.number).to eq number
         expect(digged.parent.parent).to be primus
       end
     end

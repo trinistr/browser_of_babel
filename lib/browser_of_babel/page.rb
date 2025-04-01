@@ -37,16 +37,19 @@ module BrowserOfBabel
     # @overload page[start, length]
     #   @param start [Integer]
     #   @param length [Integer]
-    # @overload page[start..end]
+    # @overload page[range]
+    #   @param range [Range<Integer>]
+    # @overload page[start]
     #   @param start [Integer]
-    #   @param end [Integer]
     # @see String#[]
     def [](start_or_range, length = nil)
       range =
         if length
           (start_or_range - 1)..(start_or_range + length - 1)
-        else
+        elsif start_or_range.is_a?(Range)
           (start_or_range.begin - 1)..(start_or_range.end - 1)
+        else
+          (start_or_range - 1)..(start_or_range - 1)
         end
       text.[](range)
     end

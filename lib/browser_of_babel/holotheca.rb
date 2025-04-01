@@ -76,10 +76,9 @@ module BrowserOfBabel
 
       # Get or set format checker for the holotheca's number.
       # @overload number_format
-      #   @return [#===]
       # @overload number_format(format)
       #   @param format [#===]
-      #   @return [void]
+      # @return [#===, nil]
       def number_format(format = nil)
         return @number_format unless format
         raise ArgumentError, "invalid checker #{format}" unless format.respond_to?(:===)
@@ -87,12 +86,24 @@ module BrowserOfBabel
         @number_format = format
       end
 
+      # Get or set expected class for the holotheca's number.
+      # Depends on {.number_format}, String by default.
+      # @overload number_class
+      # @overload number_class(klass)
+      #   @param klass [Class]
+      # @return [Class, nil]
+      def number_class(klass = nil)
+        return @number_class ||= determine_class_from_format unless klass
+        raise ArgumentError, "#{klass} is not a class" unless klass.is_a?(Class)
+
+        @number_class = klass
+      end
+
       # Get or set string formatter for URLs.
       # @overload url_format
-      #   @return [#call]
       # @overload url_format(holotheca)
       #   @param format [#call]
-      #   @return [void]
+      # @return [#call, nil] format
       def url_format(format = nil)
         return @url_format unless format
         raise ArgumentError, "invalid formatter #{format}" unless format.respond_to?(:call)
@@ -102,32 +113,44 @@ module BrowserOfBabel
 
       protected
 
-      # Set parent holotheca class.
-      # @param holotheca [Class]
       # @return [Class]
       attr_writer :parent_class
 
-      # Set child holotheca class.
-      # @param holotheca [Class]
       # @return [Class]
       attr_writer :child_class
+
+      private
+
+      def determine_class_from_format
+        case @number_format
+        when nil
+          nil
+        when Range
+          @number_format.begin.class
+        when Set
+          @number_format.first.class
+        else
+          # Regexp or something else.
+          String
+        end
+      end
     end
 
     # @return [Holotheca, nil]
     attr_reader :parent
-    # @return [String, nil]
+    # @return [String, Integer, nil]
     attr_reader :number
 
     # @param parent [Holotheca] must be an instance of {.parent_class}
-    # @param number [String, Integer] will be stringified automatically
+    # @param number [String, Integer]
     # @raise [InvalidNumberError]
     # @raise [InvalidHolothecaError]
     def initialize(parent, number)
       check_parent(parent)
       @parent = parent
 
-      check_number(number)
-      @number = -number.to_s if number
+      number = check_number(number)
+      @number = number if number
     end
 
     # (see .depth)
@@ -193,6 +216,19 @@ module BrowserOfBabel
       path.map(&:to_url_part).join
     end
 
+    # Get string representation of the holotheca.
+    # @return [String]
+    def to_s_part
+      holotheca_name = self.class.name.split("::").last if self.class.name
+      [holotheca_name, number].compact.join(" ")
+    end
+
+    # Get string representation of the holotheca path.
+    # @return [String]
+    def to_s
+      path.filter_map(&:to_s_part).join(", ")
+    end
+
     private
 
     def check_parent(parent)
@@ -203,11 +239,25 @@ module BrowserOfBabel
     end
 
     def check_number(number)
+      number = try_convert(number)
       # Includes case of nil === nil.
-      return if self.class.number_format === number
+      return number if self.class.number_format === number
 
       raise InvalidNumberError,
             "number #{number} does not correspond to expected format for #{self.class}", caller
+    end
+
+    def try_convert(number)
+      klass = self.class.number_class
+      if klass.nil?
+        number
+      elsif klass == String
+        -number.to_s
+      elsif klass == Integer
+        number.to_i
+      else
+        raise "unknown conversion to #{self.class.number_class}"
+      end
     end
   end
 end
