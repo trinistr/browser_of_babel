@@ -24,6 +24,12 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
+  before do
+    stub_const("Primary", primary)
+    stub_const("Secondary", secondary)
+    stub_const("Tertiary", tertiary)
+  end
+
   describe ".holarchy" do
     it "establishes a root-level holotheca" do
       expect(primary.parent_class).to be nil
@@ -392,6 +398,43 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       expect(primus.to_url).to eq "_1"
       expect(secundus.to_url).to eq "_10.0#{secundus.number}"
       expect(tertius.to_url).to eq "_10.0#{secundus.number}.#{tertius.number}"
+    end
+  end
+
+  describe "#to_s_part" do
+    let(:primus) { primary.new }
+    let(:secundus) { secondary.new(primus, rand(1..9)) }
+    let(:tertius) { tertiary.new(secundus, %w[md rb].sample) }
+
+    it "returns the name of the holotheca" do
+      expect(primus.to_s_part).to eq "Primary"
+      expect(secundus.to_s_part).to eq "Secondary #{secundus.number}"
+      expect(tertius.to_s_part).to eq "Tertiary #{tertius.number}"
+    end
+  end
+
+  describe "#to_s" do
+    let(:primus) { primary.new }
+    let(:secundus) { secondary.new(primus, rand(1..9)) }
+    let(:tertius) { tertiary.new(secundus, %w[md rb].sample) }
+
+    context "with multi-level holarchy" do
+      it "composes path string from all levels" do
+        expect(tertius.to_s)
+          .to eq "Primary, Secondary #{secundus.number}, Tertiary #{tertius.number}"
+      end
+    end
+
+    context "with partial holarchy" do
+      it "composes path string from available levels" do
+        expect(secundus.to_s).to eq "Primary, Secondary #{secundus.number}"
+      end
+    end
+
+    context "with a single holotheca" do
+      it "returns the name of the holotheca" do
+        expect(primus.to_s).to eq "Primary"
+      end
     end
   end
 end
