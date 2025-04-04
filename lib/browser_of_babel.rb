@@ -10,8 +10,8 @@ module BrowserOfBabel
   # Base error class for BrowserOfBabel.
   class Error < StandardError; end
 
-  # Holotheca does not support this number.
-  class InvalidNumberError < Error; end
+  # Holotheca does not support this identifier.
+  class InvalidIdentifierError < Error; end
   # Trying to go between library holotheca levels incorrectly, e.g. from hex to shelf.
   class InvalidHolothecaError < Error; end
 end

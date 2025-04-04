@@ -5,14 +5,14 @@ require_relative "page_content"
 
 module BrowserOfBabel
   # Bottom-level holotheca in the library.
-  # Number is between 1 and 410.
+  # Identifier is between 1 and 410.
   # Contains 3200 characters:
   #   - lowercase latin letters,
   #   - digits,
   #   - spaces,
   #   - commas and periods.
   class Page < Holotheca
-    number_format(1..410)
+    identifier_format(1..410)
     url_format ->(page) { ":#{page}" }
 
     # Get the book's title.

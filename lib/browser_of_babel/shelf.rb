@@ -4,10 +4,10 @@ require_relative "holotheca"
 
 module BrowserOfBabel
   # Third-level holotheca in the library.
-  # Number is between 1 and 5.
+  # Identifier is between 1 and 5.
   # Contains 32 volumes.
   class Shelf < Holotheca
-    number_format(1..5)
+    identifier_format(1..5)
     url_format ->(shelf) { "-s#{shelf}" }
   end
 end

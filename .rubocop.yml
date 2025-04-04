@@ -11,6 +11,7 @@ plugins:
 ThreadSafety/ClassInstanceVariable:
   Exclude:
     - lib/browser_of_babel/holotheca.rb
+    - lib/browser_of_babel/holotheca/holarchy.rb
 ThreadSafety/ClassAndModuleAttributes:
   Exclude:
     - lib/browser_of_babel/holotheca.rb

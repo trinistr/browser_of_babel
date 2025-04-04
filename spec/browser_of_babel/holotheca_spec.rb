@@ -12,14 +12,14 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
 
   let(:secondary) do
     Class.new(described_class) do
-      number_format 1..100
+      identifier_format 1..100
       url_format -> { _1.to_f.fdiv(100).to_s }
     end
   end
 
   let(:tertiary) do
     Class.new(described_class) do
-      number_format Set["rb", "txt", "md"]
+      identifier_format Set["rb", "txt", "md"]
       url_format -> { ".#{_1}" }
     end
   end
@@ -38,7 +38,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
 
     it "makes #initialize simpler" do
-      expect(primary.instance_method(:initialize).parameters).to eq [%i[opt number]]
+      expect(primary.instance_method(:initialize).parameters).to eq [%i[opt identifier]]
     end
   end
 
@@ -93,12 +93,12 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
-  describe ".number_format" do
+  describe ".identifier_format" do
     context "when called without an argument" do
       it "returns configured format checker" do
-        expect(primary.number_format).to be nil
-        expect(secondary.number_format).to eq 1..100
-        expect(tertiary.number_format).to eq Set["rb", "txt", "md"]
+        expect(primary.identifier_format).to be nil
+        expect(secondary.identifier_format).to eq 1..100
+        expect(tertiary.identifier_format).to eq Set["rb", "txt", "md"]
       end
     end
 
@@ -106,9 +106,9 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       context "when argument responds to #===" do
         let(:format) { Set[1] }
 
-        it "sets number checker successfully" do
-          expect { primary.number_format Set[1] }.not_to raise_error
-          expect(primary.number_format).to eq Set[1]
+        it "sets identifier checker successfully" do
+          expect { primary.identifier_format Set[1] }.not_to raise_error
+          expect(primary.identifier_format).to eq Set[1]
         end
       end
 
@@ -120,7 +120,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
         before { format.singleton_class.class_eval { undef === } }
 
         it "raises ArgumentError" do
-          expect { primary.number_format format }.to raise_error ArgumentError
+          expect { primary.identifier_format format }.to raise_error ArgumentError
         end
       end
     end
@@ -158,10 +158,10 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
   end
 
   describe "#initialize" do
-    subject(:holotheca) { secondary.new(parent, number) }
+    subject(:holotheca) { secondary.new(parent, identifier) }
 
     let(:parent) { primary.new }
-    let(:number) { rand(1..100) }
+    let(:identifier) { rand(1..100) }
 
     context "with valid arguments" do
       it "returns a new instance" do
@@ -170,33 +170,33 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
 
     context "with wrong parent" do
-      subject(:holotheca) { tertiary.new(parent, number) }
+      subject(:holotheca) { tertiary.new(parent, identifier) }
 
       it "raises InvalidHolothecaError" do
         expect { holotheca }.to raise_error BrowserOfBabel::InvalidHolothecaError
       end
     end
 
-    context "with invalid number" do
-      let(:number) { 0 }
+    context "with invalid identifier" do
+      let(:identifier) { 0 }
 
-      it "raises InvalidNumberError" do
-        expect { holotheca }.to raise_error BrowserOfBabel::InvalidNumberError
+      it "raises InvalidIdentifierError" do
+        expect { holotheca }.to raise_error BrowserOfBabel::InvalidIdentifierError
       end
     end
 
-    context "when root class has no number format" do
+    context "when root class has no identifier format" do
       it "requires no arguments for the root" do
         expect(primary.new).to be_a primary
-        expect { primary.new(33) }.to raise_error BrowserOfBabel::InvalidNumberError
+        expect { primary.new(33) }.to raise_error BrowserOfBabel::InvalidIdentifierError
       end
     end
 
-    context "when root class sets number_format" do
-      before { primary.number_format 1..100 }
+    context "when root class sets identifier_format" do
+      before { primary.identifier_format 1..100 }
 
-      it "requires `number` for the root, but no parent" do
-        expect { primary.new }.to raise_error BrowserOfBabel::InvalidNumberError
+      it "requires `identifier` for the root, but no parent" do
+        expect { primary.new }.to raise_error BrowserOfBabel::InvalidIdentifierError
         expect(primary.new(33)).to be_a primary
       end
     end
@@ -213,14 +213,14 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
-  describe "#number" do
-    subject(:number) { holotheca.number }
+  describe "#identifier" do
+    subject(:identifier) { holotheca.identifier }
 
     let(:holotheca) { secondary.new(primary.new, num) }
     let(:num) { rand(1..100) }
 
-    it "returns the number" do
-      expect(number).to eq num
+    it "returns the identifier" do
+      expect(identifier).to eq num
     end
   end
 
@@ -262,7 +262,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
 
     context "with an argument" do
-      it "goes up the specified number of levels, stopping at root" do
+      it "goes up the specified identifier of levels, stopping at root" do
         expect(primus.up(33)).to be primus
         expect(secundus.up(33)).to be primus
         expect(tertius.up(33)).to be primus
@@ -294,24 +294,24 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
   end
 
   describe "#down" do
-    subject(:downer) { primus.down(number) }
+    subject(:downer) { primus.down(identifier) }
 
     let(:primus) { primary.new }
-    let(:number) { rand(5..50) }
+    let(:identifier) { rand(5..50) }
 
-    context "with a valid number for the level" do
-      it "creates a new child holotheca with specified number" do
+    context "with a valid identifier for the level" do
+      it "creates a new child holotheca with specified identifier" do
         expect(downer).to be_a secondary
         expect(downer.parent).to be primus
-        expect(downer.number).to eq number
+        expect(downer.identifier).to eq identifier
       end
     end
 
-    context "with an invalid number for the level" do
-      let(:number) { "rb" }
+    context "with an invalid identifier for the level" do
+      let(:identifier) { "rb" }
 
-      it "raises InvalidNumberError" do
-        expect { downer }.to raise_error BrowserOfBabel::InvalidNumberError
+      it "raises InvalidIdentifierError" do
+        expect { downer }.to raise_error BrowserOfBabel::InvalidIdentifierError
       end
     end
 
@@ -325,22 +325,22 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
   end
 
   describe "#dig" do
-    subject(:digged) { primus.dig(number, extension) }
+    subject(:digged) { primus.dig(identifier, extension) }
 
     let(:primus) { primary.new }
-    let(:number) { rand(7..77) }
+    let(:identifier) { rand(7..77) }
     let(:extension) { %w[rb txt md].sample }
 
-    context "with a valid list of numbers" do
+    context "with a valid list of identifiers" do
       it "creates a line of holothecas" do
         expect(digged).to be_a tertiary
-        expect(digged.number).to eq extension
-        expect(digged.parent.number).to eq number
+        expect(digged.identifier).to eq extension
+        expect(digged.parent.identifier).to eq identifier
         expect(digged.parent.parent).to be primus
       end
     end
 
-    context "when list of numbers is empty" do
+    context "when list of identifiers is empty" do
       subject(:digged) { primus.dig }
 
       it "returns itself" do
@@ -348,16 +348,16 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       end
     end
 
-    context "when list of numbers is invalid" do
-      subject(:digged) { primus.dig(extension, number) }
+    context "when list of identifiers is invalid" do
+      subject(:digged) { primus.dig(extension, identifier) }
 
-      it "raises InvalidNumberError" do
-        expect { digged }.to raise_error BrowserOfBabel::InvalidNumberError
+      it "raises InvalidIdentifierError" do
+        expect { digged }.to raise_error BrowserOfBabel::InvalidIdentifierError
       end
     end
 
-    context "when list of numbers is too long" do
-      subject(:digged) { primus.dig(number, extension, number) }
+    context "when list of identifiers is too long" do
+      subject(:digged) { primus.dig(identifier, extension, identifier) }
 
       it "raises InvalidHolothecaError" do
         expect { digged }.to raise_error BrowserOfBabel::InvalidHolothecaError
@@ -382,10 +382,10 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     let(:secundus) { secondary.new(primus, rand(1..9)) }
     let(:tertius) { tertiary.new(secundus, %w[txt rb].sample) }
 
-    it "formats the number with .url_format" do
+    it "formats the identifier with .url_format" do
       expect(primus.to_url_part).to eq "_1"
-      expect(secundus.to_url_part).to eq "0.0#{secundus.number}"
-      expect(tertius.to_url_part).to eq ".#{tertius.number}"
+      expect(secundus.to_url_part).to eq "0.0#{secundus.identifier}"
+      expect(tertius.to_url_part).to eq ".#{tertius.identifier}"
     end
   end
 
@@ -396,8 +396,8 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
 
     it "formats the whole path with .url_format and joins results" do
       expect(primus.to_url).to eq "_1"
-      expect(secundus.to_url).to eq "_10.0#{secundus.number}"
-      expect(tertius.to_url).to eq "_10.0#{secundus.number}.#{tertius.number}"
+      expect(secundus.to_url).to eq "_10.0#{secundus.identifier}"
+      expect(tertius.to_url).to eq "_10.0#{secundus.identifier}.#{tertius.identifier}"
     end
   end
 
@@ -408,8 +408,8 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
 
     it "returns the name of the holotheca" do
       expect(primus.to_s_part).to eq "Primary"
-      expect(secundus.to_s_part).to eq "Secondary #{secundus.number}"
-      expect(tertius.to_s_part).to eq "Tertiary #{tertius.number}"
+      expect(secundus.to_s_part).to eq "Secondary #{secundus.identifier}"
+      expect(tertius.to_s_part).to eq "Tertiary #{tertius.identifier}"
     end
   end
 
@@ -421,13 +421,13 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     context "with multi-level holarchy" do
       it "composes path string from all levels" do
         expect(tertius.to_s)
-          .to eq "Primary, Secondary #{secundus.number}, Tertiary #{tertius.number}"
+          .to eq "Primary, Secondary #{secundus.identifier}, Tertiary #{tertius.identifier}"
       end
     end
 
     context "with partial holarchy" do
       it "composes path string from available levels" do
-        expect(secundus.to_s).to eq "Primary, Secondary #{secundus.number}"
+        expect(secundus.to_s).to eq "Primary, Secondary #{secundus.identifier}"
       end
     end
 

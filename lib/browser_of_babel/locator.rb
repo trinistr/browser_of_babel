@@ -32,7 +32,7 @@ module BrowserOfBabel
     # @param reference [String]
     # @return [Holotheca]
     # @raise [ArgumentError] if +reference+ does not match +format+
-    # @raise [InvalidNumberError] if +reference+ contains invalid identifiers
+    # @raise [InvalidIdentifierError] if +reference+ contains invalid identifiers
     def call(reference)
       match = format.match(reference)
       raise ArgumentError, "reference is invalid" unless match

@@ -32,7 +32,7 @@ RSpec.describe BrowserOfBabel::Page, :aggregate_failures do
 
     it "generates properly formatted URL" do
       expect(uri).to eq(
-        "#{library}?#{hex}-w#{wall}-s#{shelf}-v#{format("%02d", volume)}:#{page.number}"
+        "#{library}?#{hex}-w#{wall}-s#{shelf}-v#{format("%02d", volume)}:#{page.identifier}"
       )
     end
   end
