@@ -38,7 +38,4 @@ group :development do
 
   # Documentation
   gem "yard", require: false
-
-  # Language server for development
-  gem "solargraph", require: false
 end
