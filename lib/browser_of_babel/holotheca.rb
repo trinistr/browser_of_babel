@@ -117,7 +117,7 @@ module BrowserOfBabel
     end
 
     def check_identifier(identifier)
-      identifier = try_convert(identifier)
+      identifier = convert_identifier(identifier)
       # Includes case of nil === nil.
       return identifier if self.class.identifier_format === identifier
 
@@ -125,7 +125,7 @@ module BrowserOfBabel
             "identifier #{identifier} does not correspond to expected format for #{self.class}"
     end
 
-    def try_convert(identifier)
+    def convert_identifier(identifier)
       klass = self.class.identifier_class
       if klass.nil?
         identifier
