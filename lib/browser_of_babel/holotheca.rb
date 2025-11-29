@@ -97,7 +97,7 @@ module BrowserOfBabel
     # Get string representation of the holotheca.
     # @return [String]
     def to_s_part
-      holotheca_name = self.class.name.split("::").last if self.class.name
+      holotheca_name = self.class.name.split("::").last if self.class.name # rubocop:disable Style/IpAddresses
       [holotheca_name, identifier].compact.join(" ")
     end
 

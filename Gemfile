@@ -4,38 +4,50 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "rake", "~> 13.0", require: false
+# All gems that aren't actually used in code should have "require: false".
+# This is needed for RBS, because otherwise it will install insane number of definitions.
+# Alternatively, ignore them in `rbs_collection.yaml`.
+
+# For running tasks
+gem "rake", require: false
 
 group :test do
-  gem "rspec", "~> 3.0", require: false
+  # Testing framework
+  gem "rspec", require: false
 
   # Code coverage report
   gem "simplecov", require: false
+  gem "simplecov_lcov_formatter", require: false
 end
 
 group :linting do
   # Linting
-  gem "rubocop", "~> 1.21", require: false
+  gem "rubocop", "~> 1.72", require: false
+  gem "rubocop-packaging", require: false
   gem "rubocop-performance", require: false
   gem "rubocop-rake", require: false
   gem "rubocop-rspec", require: false
   gem "rubocop-thread_safety", require: false
+  gem "rubocop-yard", require: false
 
   # Checking type signatures
   gem "rbs", require: false
+  # Checking types in code
+  gem "steep", require: false
+end
+
+group :documentation do
+  # Documentation generation
+  gem "redcarpet", require: false
+  gem "yard", require: false
 end
 
 group :development do
-  # Console and debugger
-  gem "debug", require: false
-  gem "irb", require: false
-
-  # Version changes
+  # Automatic updates for version changes
   gem "bump", require: false
 
-  # Type checking
-  gem "steep", require: false
-
-  # Documentation
-  gem "yard", require: false
+  # Benchmarking and profiling
+  gem "benchmark", require: false
+  gem "benchmark-ips", require: false
+  gem "stackprof", require: false
 end

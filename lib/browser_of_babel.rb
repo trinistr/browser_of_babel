@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require_relative "browser_of_babel/version"
 require_relative "browser_of_babel/library"
 require_relative "browser_of_babel/locator"
+require_relative "browser_of_babel/version"
 
 # Browser for Library of Babel.
 # @see https://libraryofbabel.info

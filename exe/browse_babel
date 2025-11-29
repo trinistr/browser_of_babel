@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require_relative "../lib/browser_of_babel"
+require "browser_of_babel"
 
 if ARGV.empty? || ARGV.include?("-h") || ARGV.include?("--help")
   puts <<~TEXT

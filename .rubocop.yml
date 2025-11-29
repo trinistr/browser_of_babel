@@ -2,10 +2,12 @@ inherit_from:
   - https://raw.githubusercontent.com/trinistr/rubocop-config/main/rubocop.yml
 
 plugins:
+  - rubocop-packaging
   - rubocop-performance
   - rubocop-rake
   - rubocop-rspec
   - rubocop-thread_safety
+  - rubocop-yard
 
 # Class variables should only be modified during class loading.
 ThreadSafety/ClassInstanceVariable:

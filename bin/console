@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# Set up LOAD_PATH with Bundler
 require "bundler/setup"
-require "browser_of_babel"
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
+# Load this gem
+gem_entry = Dir["#{__dir__}/../lib/*.rb"].first
+require_relative gem_entry
 
 L = BrowserOfBabel::Locator
 

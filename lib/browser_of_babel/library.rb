@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 require_relative "holotheca"
+
 require_relative "hex"
-require_relative "wall"
+require_relative "page"
 require_relative "shelf"
 require_relative "volume"
-require_relative "page"
+require_relative "wall"
 
 module BrowserOfBabel
   # Top-level holotheca, representing the whole Library of Babel.

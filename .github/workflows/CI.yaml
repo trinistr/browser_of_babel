@@ -1,0 +1,86 @@
+name: CI
+permissions:
+  contents: read
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.rb"
+      - "**/*.rbs"
+      - "**/*.gemspec"
+      - Gemfile*
+      - Rakefile
+  pull_request:
+    paths:
+      - "**/*.rb"
+      - "**/*.rbs"
+      - "**/*.gemspec"
+      - Gemfile*
+      - Rakefile
+  workflow_dispatch:
+  schedule:
+  - cron: "13 5 * * TUE"
+jobs:
+  CRuby:
+    uses: ./.github/workflows/cruby.yaml
+  JRuby:
+    uses: ./.github/workflows/jruby.yaml
+  TruffleRuby:
+    uses: ./.github/workflows/truffle_ruby.yaml
+  lint:
+    name: Rubocop
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_ONLY: "default:linting"
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Run Rubocop
+      run: bundle exec rubocop -f github
+  signatures:
+    name: RBS
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_ONLY: "default:linting"
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Install RBS collection
+      run: bundle exec rbs collection install
+    - name: Run RBS
+      run: bundle exec rake rbs
+  coverage:
+    name: Coverage report for PR
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: CRuby
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_ONLY: "default:test"
+    permissions:
+      pull-requests: write
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        persist-credentials: false
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        bundler-cache: true
+    - name: Run RSpec
+      run: bundle exec rake spec
+    - name: Add code coverage comment
+      uses: romeovs/lcov-reporter-action@87a815f34ec27a5826abba44ce09bbc688da58fd
+      with:
+        lcov-file: ./coverage/lcov/gem_template.lcov
+        delete-old-comments: true

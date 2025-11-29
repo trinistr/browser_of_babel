@@ -1,0 +1,46 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [v0.1.0] — 2025-04-07
+
+First really useful version.
+
+**Added**
+- `BrowserOfBabel::Locator` with `#call` to find holothecas and text by reference.
+
+**Changed**
+- Make `Page#[]` also accept single numbers to return one character, in addition to ranges and start-length pair.
+- Change more internal methods.
+
+**Removed**
+- `BrowserOfBabel::Finder` in favor of `BrowserOfBabel::Locator`.
+
+## [v0.1.0-alpha2] — 2025-11-30
+
+Original idea to "interpret" the texts was dropped in favor of just making this a browser.
+
+**Changed**
+- Rename `InterpreterOfBabel` to `BrowserOfBabel`.
+- Rename `InterpreterOfBabel::Container` to `BrowserOfBabel::Holotheca` to smart.
+- Add more methods to `Holotheca` to simplify subclasses.
+
+**Added**
+- A few methods of `Holotheca`.
+
+## [v0.1.0-alpha1] — 2025-03-30
+
+First implementation.
+
+**Added**
+- `InterpreterOfBabel::Container` class and its subclasses: `Library`, `Hex`, `Wall`, `Shelf`, `Volume`, `Page`, with methods to navigate the library.
+- `InterpreterOfBabel::PageContent` which fetches the actual page and allows to access its content.
+- `InterpreterOfBabel::Finder` with `#call` to find page by full address.
+
+[Next]: https://github.com/trinistr/browser_of_babel/tree/main
+[v0.1.0]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0
+[v0.1.0-alpha2]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0-alpha2
+[v0.1.0-alpha1]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0-alpha1
