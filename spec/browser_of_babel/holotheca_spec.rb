@@ -504,6 +504,40 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
+  describe "#path_identifiers" do
+    let(:primus) { primary.new }
+    let(:secundus) { secondary.new(primus, 50) }
+    let(:tertius) { tertiary.new(secundus, "txt") }
+
+    it "returns identifiers of all holothecas in the path" do
+      expect(primus.path_identifiers).to eq [nil]
+      expect(secundus.path_identifiers).to eq [nil, 50]
+      expect(tertius.path_identifiers).to eq [nil, 50, "txt"]
+    end
+  end
+
+  describe "#deconstruct" do
+    let(:primus) { primary.new }
+    let(:secundus) { secondary.new(primus, 12) }
+    let(:tertius) { tertiary.new(secundus, "txt") }
+
+    include_examples "has an alias", :deconstruct, :path_identifiers
+
+    it "allows pattern matching with an array pattern" do
+      # Pattern matching causes branch coverage to be reported as missed.
+      # :nocov:
+      expect((primus in [nil])).to be true
+      expect((primus in Primary)).to be true
+
+      expect((secundus in Secondary[nil, 12])).to be true
+      expect((secundus in Primary[nil, 12])).to be false
+
+      expect((tertius in [*, "txt"])).to be true
+      expect((tertius in [*, "rb"])).to be false
+      # :nocov:
+    end
+  end
+
   describe "#to_url_part" do
     let(:primus) { primary.new }
     let(:secundus) { secondary.new(primus, rand(1..9)) }

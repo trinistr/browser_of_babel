@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Added**
 - `Volume#title`.
+- Pattern matching of holothecas with array patterns via `Holotheca#path_identifers`, aliased as `#deconstruct`.
 
 **Changed**
 - [BREAKING] Rename `browse_babel` executable to `browser_of_babel` for consistency.

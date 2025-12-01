@@ -85,7 +85,16 @@ module BrowserOfBabel
         @path ||= enumerate_parents.take_while(&:itself).reverse!
       end
 
-      # (see .depth)
+      # Get identifiers of all holothecas in the {#path}.
+      # @return [Array<Any>]
+      def path_identifiers
+        path.map(&:identifier)
+      end
+
+      alias deconstruct path_identifiers
+
+      # Get depth of this holotheca in the holarchy, starting from {#root}.
+      # @return [Integer]
       def depth
         @depth ||=
           enumerate_parents.reduce(0) { |count, e| e.parent ? count + 1 : (break count) }
