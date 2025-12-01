@@ -14,5 +14,10 @@ module BrowserOfBabel
     holarchy Hex >> Wall >> Shelf >> Volume >> Page
 
     url_format ->(*) { "https://libraryofbabel.info/book.cgi?" }
+
+    # @return [String]
+    def to_s_part
+      "Library of Babel"
+    end
   end
 end

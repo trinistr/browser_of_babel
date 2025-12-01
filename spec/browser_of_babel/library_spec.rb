@@ -12,4 +12,10 @@ RSpec.describe BrowserOfBabel::Library, :aggregate_failures do
   it "has a depth of 0" do
     expect(described_class.depth).to be 0
   end
+
+  describe "#to_s_part" do
+    it "returns 'Library of Babel'" do
+      expect(described_class.new.to_s_part).to eq "Library of Babel"
+    end
+  end
 end

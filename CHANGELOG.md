@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+**Added**
+- `Volume#title`.
+
 **Changed**
 - [BREAKING] Rename `browse_babel` executable to `browser_of_babel` for consistency.
 - Allow `Holotheca` to use identifiers that aren't Integer or String; now any value is supported, with baked-in conversion added for Symbol.
 - Make `Holotheca` more resilient to different `.identifier_format`s, should now support pretty much any case, including re-setting it to `nil`.
+- Rename `Page#book_title` to `Page#volume_title`.
 
 **Fixed**
 - `Holotheca#path`, `#root` and `#depth` now all work correctly even if holarchy is changed after instantiation, checking the actual parents, not classes.

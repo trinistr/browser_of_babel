@@ -15,32 +15,37 @@ module BrowserOfBabel
     identifier_format(1..410)
     url_format ->(page) { ":#{page}" }
 
-    # Get the book's title.
+    # Get the volume's title.
+    # @note This performs a network request to fetch the page's content.
     # @return [String]
-    def book_title
+    def volume_title
       title[/.+(?= \d+\z)/]
     end
 
-    # Get the page's title (it's book title + number of the page).
+    # Get the page's title (volume's title + page number).
+    # @note This performs a network request to fetch the page's content.
     # @return [String]
     def title
       content.title
     end
 
     # Get the page's contents as a blob of text.
+    # @note This performs a network request to fetch the page's content.
     # @return [String]
     def text
       content.text
     end
 
     # Get text from the page.
+    # Character indices are 1-based.
+    # @note This performs a network request to fetch the page's content.
     # @overload page[start, length]
     #   @param start [Integer]
     #   @param length [Integer]
     # @overload page[range]
     #   @param range [Range<Integer>]
-    # @overload page[start]
-    #   @param start [Integer]
+    # @overload page[index]
+    #   @param index [Integer]
     # @see String#[]
     def [](start_or_range, length = nil)
       range =

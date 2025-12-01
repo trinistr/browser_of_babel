@@ -12,4 +12,14 @@ RSpec.describe BrowserOfBabel::Volume, :aggregate_failures do
   it "has a depth of 4" do
     expect(described_class.depth).to be 4
   end
+
+  describe "#title" do
+    include_context "with mocked page request"
+
+    let(:volume) { BrowserOfBabel::Library.new.dig("1", 2, 3, 4) }
+
+    it "returns the volume's title" do
+      expect(volume.title).to eq "jbcde"
+    end
+  end
 end

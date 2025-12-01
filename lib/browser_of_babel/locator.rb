@@ -35,7 +35,7 @@ module BrowserOfBabel
     # @raise [InvalidIdentifierError] if +reference+ contains invalid identifiers
     def call(reference)
       match = format.match(reference)
-      raise ArgumentError, "reference is invalid" unless match
+      invalid_reference unless match
 
       identifiers =
         match[:separator] ? match[:holotheca].split(match[:separator]) : match[:holotheca]
@@ -43,6 +43,8 @@ module BrowserOfBabel
       return holotheca unless match[:range]
 
       extract_text(holotheca, match[:range])
+    rescue InvalidIdentifierError
+      invalid_reference
     end
 
     private
@@ -54,6 +56,10 @@ module BrowserOfBabel
 
     def to_range(expression)
       expression.split("-").map(&:to_i).then { _1.._2 }
+    end
+
+    def invalid_reference
+      raise ArgumentError, "reference is invalid", caller
     end
   end
 end

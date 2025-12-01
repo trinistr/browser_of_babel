@@ -9,5 +9,12 @@ module BrowserOfBabel
   class Volume < Holotheca
     identifier_format(1..32)
     url_format ->(volume) { "-v#{format("%02d", volume)}" }
+
+    # Get the volume's title.
+    # @note This performs a network request to fetch a page.
+    # @return [String]
+    def title
+      @title ||= down(1).volume_title
+    end
   end
 end
