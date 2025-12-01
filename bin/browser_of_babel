@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+$LOAD_PATH << File.expand_path("../lib", __dir__)
+load "#{__dir__}/../exe/browser_of_babel"

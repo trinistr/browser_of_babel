@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Next]
 
 **Changed**
+- [BREAKING] Rename `browse_babel` executable to `browser_of_babel` for consistency.
 - Allow `Holotheca` to use identifiers that aren't Integer or String; now any value is supported, with baked-in conversion added for Symbol.
 - Make `Holotheca` more resilient to different `.identifier_format`s, should now support pretty much any case, including re-setting it to `nil`.
 
