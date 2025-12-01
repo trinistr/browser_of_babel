@@ -24,6 +24,13 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     end
   end
 
+  let(:unnamed) do
+    Class.new(described_class) do
+      identifier_format ->(id) { String === id || id.nil? }
+      def initialize(identifier = nil) = super(nil, identifier)
+    end
+  end
+
   before do
     stub_const("Primary", primary)
     stub_const("Secondary", secondary)
@@ -106,7 +113,7 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       context "when argument responds to #===" do
         let(:format) { Set[1] }
 
-        it "sets identifier checker successfully" do
+        it "sets identifier validator successfully" do
           expect { primary.identifier_format Set[1] }.not_to raise_error
           expect(primary.identifier_format).to eq Set[1]
         end
@@ -122,6 +129,51 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
         it "raises ArgumentError" do
           expect { primary.identifier_format format }.to raise_error ArgumentError
         end
+      end
+
+      context "when called with nil" do
+        before { primary.identifier_format Set[1] }
+
+        it "sets identifier validator to nil" do
+          expect { primary.identifier_format nil }.not_to raise_error
+          expect(primary.identifier_format).to be nil
+        end
+      end
+    end
+  end
+
+  describe ".identifier_class" do
+    context "if identifier_format is nil" do
+      it "returns nil" do
+        expect(primary.identifier_class).to be nil
+      end
+    end
+
+    context "if identifier_format is a Class" do
+      before { primary.identifier_format NilClass }
+
+      it "returns that class" do
+        expect(primary.identifier_class).to eq NilClass
+      end
+    end
+
+    context "if identifier_format is a Range" do
+      it "returns class of the first element" do
+        expect(secondary.identifier_class).to eq Integer
+      end
+    end
+
+    context "if identifier_format is a Set with elements of the same class" do
+      it "returns class of the first element" do
+        expect(tertiary.identifier_class).to eq String
+      end
+    end
+
+    context "if identifier_format is a Set with different classes" do
+      before { primary.identifier_format Set[nil, false, true] }
+
+      it "returns nil" do
+        expect(primary.identifier_class).to be nil
       end
     end
   end
@@ -185,10 +237,63 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       end
     end
 
+    context "with inconvertible identifier format" do
+      let(:identifier) { false }
+
+      before { secondary.identifier_format Set[nil, false, true] }
+
+      it "returns a new instance with specified identifier" do
+        expect(holotheca.identifier).to be false
+      end
+    end
+
+    context "with identifier of a different class than expected" do
+      context "if identifier_class is Integer" do
+        let(:identifier) { rand(1..100).to_s }
+
+        it "returns a new instance with identifier converted with #to_i" do
+          expect(holotheca.identifier).to be_a Integer
+        end
+      end
+
+      context "if identifier_class is String" do
+        let(:identifier) { rand(1..100) }
+
+        before { secondary.identifier_format(/\A\d+\z/) }
+
+        it "returns a new instance with identifier converted with #to_s" do
+          expect(holotheca.identifier).to be_a String
+        end
+      end
+
+      context "if identifier_class is Symbol" do
+        let(:identifier) { rand(1..100).to_s }
+
+        before { secondary.identifier_format Symbol }
+
+        it "returns a new instance with identifier converted with #to_sym" do
+          expect(holotheca.identifier).to be_a Symbol
+        end
+      end
+
+      context "if there is no known conversion" do
+        let(:identifier) { 1 }
+
+        before { secondary.identifier_format Float }
+
+        it "raises InvalidIdentifierError" do
+          expect { holotheca }
+            .to raise_error BrowserOfBabel::InvalidIdentifierError, "unknown conversion to Float"
+        end
+      end
+    end
+
     context "when root class has no identifier format" do
       it "requires no arguments for the root" do
         expect(primary.new).to be_a primary
-        expect { primary.new(33) }.to raise_error BrowserOfBabel::InvalidIdentifierError
+        expect { primary.new(33) }
+          .to raise_error BrowserOfBabel::InvalidIdentifierError,
+                          "identifier 33 does not correspond to expected format for Primary"
       end
     end
 
@@ -196,7 +301,9 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       before { primary.identifier_format 1..100 }
 
       it "requires `identifier` for the root, but no parent" do
-        expect { primary.new }.to raise_error BrowserOfBabel::InvalidIdentifierError
+        expect { primary.new }
+          .to raise_error BrowserOfBabel::InvalidIdentifierError,
+                          "identifier nil does not correspond to expected format for Primary"
         expect(primary.new(33)).to be_a primary
       end
     end
@@ -280,15 +387,35 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
       end
     end
 
+    context "when argument has #to_int" do
+      let(:arg) { Object.new }
+
+      before { def arg.to_int = 1 }
+
+      it "converts it to integer" do
+        expect(primus.up(arg)).to be primus
+        expect(secundus.up(arg)).to be primus
+        expect(tertius.up(arg)).to be secundus
+      end
+
+      context "and it doesn't work as expected" do
+        before { def arg.to_int = "1" }
+
+        it "reraises error" do
+          expect { primus.up(arg) }.to raise_error NoMethodError
+        end
+      end
+    end
+
     context "with a negative argument" do
       it "raises ArgumentError" do
         expect { secundus.up(-1) }.to raise_error ArgumentError
       end
     end
 
-    context "with an invalid argument" do
+    context "with a non-convertible argument" do
       it "raises ArgumentError" do
-        expect { secundus.up(0.5) }.to raise_error ArgumentError
+        expect { secundus.up("1") }.to raise_error ArgumentError
       end
     end
   end
@@ -405,11 +532,15 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     let(:primus) { primary.new }
     let(:secundus) { secondary.new(primus, rand(1..9)) }
     let(:tertius) { tertiary.new(secundus, %w[md rb].sample) }
+    let(:solus) { unnamed.new("est") }
+    let(:nillus) { unnamed.new }
 
     it "returns the name of the holotheca" do
       expect(primus.to_s_part).to eq "Primary"
       expect(secundus.to_s_part).to eq "Secondary #{secundus.identifier}"
       expect(tertius.to_s_part).to eq "Tertiary #{tertius.identifier}"
+      expect(solus.to_s_part).to eq "est"
+      expect(nillus.to_s_part).to eq ""
     end
   end
 
@@ -417,6 +548,8 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     let(:primus) { primary.new }
     let(:secundus) { secondary.new(primus, rand(1..9)) }
     let(:tertius) { tertiary.new(secundus, %w[md rb].sample) }
+    let(:solus) { unnamed.new("est") }
+    let(:nillus) { unnamed.new }
 
     context "with multi-level holarchy" do
       it "composes path string from all levels" do
@@ -434,6 +567,13 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
     context "with a single holotheca" do
       it "returns the name of the holotheca" do
         expect(primus.to_s).to eq "Primary"
+      end
+    end
+
+    context "if holotheca class doesn't have a name" do
+      it "skips it" do
+        expect(solus.to_s).to eq "est"
+        expect(nillus.to_s).to eq ""
       end
     end
   end

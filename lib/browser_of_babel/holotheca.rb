@@ -11,29 +11,44 @@ module BrowserOfBabel
     extend Holarchy::ClassMethods
 
     class << self
-      # Get or set format checker for the holotheca's identifier.
+      # Get or set format validator for the holotheca's identifier.
       # @overload identifier_format
       # @overload identifier_format(format)
       #   @param format [#===]
       # @return [#===, nil]
-      def identifier_format(format = nil)
-        return @identifier_format unless format
-        raise ArgumentError, "invalid checker #{format}" unless format.respond_to?(:===)
+      def identifier_format(format = (no_argument = true; nil)) # rubocop:disable Style/Semicolon
+        return @identifier_format if no_argument
 
-        @identifier_format = format
+        return @identifier_format = format if format.respond_to?(:===)
+
+        raise ArgumentError, "invalid format validator #{format}"
       end
 
-      # Get or set expected class for the holotheca's identifier.
-      # Depends on {.identifier_format}, String by default.
-      # @overload identifier_class
-      # @overload identifier_class(klass)
-      #   @param klass [Class]
+      # Get expected class for the holotheca's identifier.
+      #
+      # Depends on {.identifier_format}:
+      # - a +Class+ — that class
+      # - a +Regexp+ — +String+
+      # - a +Range+ — class of the first element
+      # - a +Set+ — class of first element if all elements are of that class
+      #   (subsequent elements can be of a subclass)
+      # - anything else — +nil+ (class unknown)
+      #
       # @return [Class, nil]
-      def identifier_class(klass = nil)
-        return @identifier_class ||= determine_class_from_format unless klass
-        raise ArgumentError, "#{klass} is not a class" unless klass.is_a?(Class)
-
-        @identifier_class = klass
+      def identifier_class
+        case @identifier_format
+        when Class
+          @identifier_format
+        when Regexp
+          String
+        when Range
+          @identifier_format.begin.class
+        when Set
+          klass = @identifier_format.first.class
+          (@identifier_format.all? { klass === _1 }) ? klass : nil
+        else
+          nil
+        end
       end
 
       # Get or set string formatter for URLs.
@@ -41,45 +56,38 @@ module BrowserOfBabel
       # @overload url_format(holotheca)
       #   @param format [#call]
       # @return [#call, nil] format
-      def url_format(format = nil)
-        return @url_format unless format
-        raise ArgumentError, "invalid formatter #{format}" unless format.respond_to?(:call)
+      def url_format(format = (no_argument = true; nil)) # rubocop:disable Style/Semicolon
+        return @url_format if no_argument
 
-        @url_format = format
+        return @url_format = format if format.respond_to?(:call)
+
+        raise ArgumentError, "invalid formatter #{format}"
       end
 
-      private
+      # Get the name of the holotheca,
+      # the class name without the namespace.
+      # @return [String, nil]
+      def holotheca_name
+        return unless name
 
-      def determine_class_from_format
-        case @identifier_format
-        when nil
-          nil
-        when Range
-          @identifier_format.begin.class
-        when Set
-          @identifier_format.first.class
-        else
-          # Regexp or something else.
-          String
-        end
+        @holotheca_name ||= name.split("::").last # rubocop:disable Style/IpAddresses
       end
     end
 
     # @return [Holotheca, nil]
     attr_reader :parent
-    # @return [String, Integer, nil]
+    # @return [Any]
     attr_reader :identifier
 
     # @param parent [Holotheca] must be an instance of {.parent_class}
-    # @param identifier [String, Integer]
-    # @raise [InvalidIdentifierError]
+    # @param identifier [Any] must correspond to {.identifier_format};
+    #   if {.identifier_class} is +String+, +Symbol+, or +Integer+,
+    #   +identifier+ is converted to a frozen instance with #to_s, #to_sym, or #to_i respectively
     # @raise [InvalidHolothecaError]
+    # @raise [InvalidIdentifierError]
     def initialize(parent, identifier)
-      check_parent(parent)
-      @parent = parent
-
-      identifier = check_identifier(identifier)
-      @identifier = identifier if identifier
+      @parent = check_parent(parent)
+      @identifier = check_identifier(identifier)
     end
 
     # Get string representation for use in URIs.
@@ -94,11 +102,19 @@ module BrowserOfBabel
       path.map(&:to_url_part).join
     end
 
-    # Get string representation of the holotheca.
+    # Get string representation of the holotheca: {.holotheca_name} + {#identifier}.
+    # May be empty.
     # @return [String]
     def to_s_part
-      holotheca_name = self.class.name.split("::").last if self.class.name # rubocop:disable Style/IpAddresses
-      [holotheca_name, identifier].compact.join(" ")
+      if self.class.holotheca_name
+        if identifier
+          "#{self.class.holotheca_name} #{identifier}"
+        else
+          self.class.holotheca_name
+        end
+      else
+        identifier.to_s
+      end
     end
 
     # Get string representation of the holotheca path.
@@ -111,30 +127,37 @@ module BrowserOfBabel
 
     def check_parent(parent)
       # Includes case of nil === nil.
-      return if self.class.parent_class === parent
+      return parent if self.class.parent_class === parent
 
       raise InvalidHolothecaError, "#{parent} is not a #{self.class.parent_class}"
     end
 
     def check_identifier(identifier)
-      identifier = convert_identifier(identifier)
+      converted_identifier = convert_identifier(identifier)
       # Includes case of nil === nil.
-      return identifier if self.class.identifier_format === identifier
+      return converted_identifier if self.class.identifier_format === converted_identifier
 
-      raise InvalidIdentifierError,
-            "identifier #{identifier} does not correspond to expected format for #{self.class}"
+      raise(
+        InvalidIdentifierError,
+        "identifier #{identifier.inspect} does not correspond to expected format for #{self.class}"
+      )
     end
 
     def convert_identifier(identifier)
       klass = self.class.identifier_class
-      if klass.nil?
-        identifier
-      elsif klass == String
+      return identifier if klass.nil?
+
+      if klass == String
+        # Always freeze String identifiers.
         -identifier.to_s
+      elsif klass === identifier
+        identifier
+      elsif klass == Symbol
+        identifier.to_sym
       elsif klass == Integer
         identifier.to_i
       else
-        raise "unknown conversion to #{self.class.identifier_class}"
+        raise InvalidIdentifierError, "unknown conversion to #{klass}"
       end
     end
   end

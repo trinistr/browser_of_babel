@@ -61,11 +61,7 @@ module BrowserOfBabel
         # Depth of this holotheca class in the holarchy, starting from 0.
         # @return [Integer]
         def depth
-          if @parent_class
-            @depth ||= @parent_class.depth + 1
-          else
-            0
-          end
+          @parent_class ? @parent_class.depth + 1 : 0
         end
 
         # Get root holotheca class for the holarchy.
@@ -83,35 +79,50 @@ module BrowserOfBabel
         attr_writer :child_class
       end
 
+      # Get holothecas from the top level to this one.
+      # @return [Array<Holotheca>]
+      def path
+        @path ||= enumerate_parents.take_while(&:itself).reverse!
+      end
+
       # (see .depth)
       def depth
-        self.class.depth
+        @depth ||=
+          enumerate_parents.reduce(0) { |count, e| e.parent ? count + 1 : (break count) }
       end
 
       # Get the root holotheca.
       # @return [Holotheca]
       def root
-        @root ||= Enumerator.produce(self) { _1.parent }.find { _1.parent.nil? }
+        @root ||= enumerate_parents.find { _1.parent.nil? }
       end
 
       # Go up +levels+ number of times.
+      #
       # There is no penalty for trying to escape from the top level.
-      # @param levels [Integer]
+      #
+      # @param levels [#to_int]
       # @return [Holotheca]
-      # @raise [ArgumentError] if +levels+ is not a non-negative integer
+      # @raise [ArgumentError] if +levels+ is not negative or can't be converted to integer
       def up(levels = 1)
-        raise ArgumentError, "levels must be an integer" unless levels.is_a?(Integer)
+        levels = levels.to_int
         raise ArgumentError, "levels must be non-negative" if levels.negative?
 
         (levels.zero? || !parent) ? self : parent.up(levels - 1)
+      rescue NoMethodError => e
+        raise unless e.name == :to_int
+
+        raise ArgumentError, "no implicit conversion of #{levels.class} to Integer"
       end
 
       # Go down a level to holotheca called +identifier+.
+      #
       # It is an error to go below the lowest level.
-      # @param identifier [String, Integer]
+      #
+      # @param identifier [String, Symbol, Integer, Any]
       # @return [Holotheca]
+      # @raise [InvalidHolothecaError] if there is no possible child holotheca
       # @raise [InvalidIdentifierError]
-      # @raise [InvalidHolothecaError]
       def down(identifier)
         raise InvalidHolothecaError, "nowhere to go down" unless self.class.child_class
 
@@ -119,19 +130,20 @@ module BrowserOfBabel
       end
 
       # Go down several levels, following a string of +identifier+s.
-      # @param identifiers [Array<String, Integer>]
-      # @raise [InvalidIdentifierError]
+      # @see #down
+      # @param identifiers [Array<String, Symbol, Integer, Any>]
       # @raise [InvalidHolothecaError]
+      # @raise [InvalidIdentifierError]
       def dig(*identifiers)
         return self if !identifiers || identifiers.empty?
 
-        down(identifiers.shift).dig(*identifiers)
+        down(identifiers.first).dig(*identifiers[1..])
       end
 
-      # Get holothecas from the top level to this one.
-      # @return [Array<Holotheca>]
-      def path
-        @path ||= Enumerator.produce(self) { _1.parent }.take_while(&:itself).reverse!
+      private
+
+      def enumerate_parents
+        Enumerator.produce(self) { _1.parent }
       end
     end
   end
