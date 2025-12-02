@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-return unless RUBY_ENGINE == "ruby"
-
 begin
   require "simplecov"
   require "simplecov_lcov_formatter"
@@ -12,7 +10,8 @@ end
 
 SimpleCov.start do
   enable_coverage :branch
-  enable_coverage_for_eval
+  # https://github.com/jruby/jruby/pull/9098
+  enable_coverage_for_eval unless RUBY_ENGINE == "jruby"
 
   add_group "Lib", "lib"
   add_group "Tests", "spec"
