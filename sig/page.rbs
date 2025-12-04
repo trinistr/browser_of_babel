@@ -1,0 +1,33 @@
+module BrowserOfBabel
+  class Page < Holotheca
+    def volume_title
+      : () -> String
+    def title
+      : () -> String
+    def text
+      : () -> String
+    def []
+      : (Integer start, Integer length) -> (String | nil)
+      | ((Range[Integer] | Integer) range_or_index) -> (String | nil)
+
+    private
+
+    def content
+      : () -> PageContent
+  end
+
+  class PageContent
+    def initialize
+      : (Page page) -> void
+
+    def title
+      : () -> String
+    def text
+      : () -> String
+
+    private
+
+    def html
+      : () -> Nokogiri::HTML::Document
+  end
+end

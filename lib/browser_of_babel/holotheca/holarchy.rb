@@ -2,6 +2,7 @@
 
 module BrowserOfBabel
   class Holotheca
+    # @api private
     # Methods related to manipulating hierarachy of holathecas.
     module Holarchy
       # Class methods for manipulating hierarchy.
@@ -46,11 +47,10 @@ module BrowserOfBabel
         # Define holarchy relationship where +other+ is a part of +self+.
         # @example
         #   Library >> Section >> Bookcase >> Book
-        # @param other [Class] a subclass of Holotheca
+        # @param other [Class] a subclass of Holarchy
         # @return [Class] +other+
         def >>(other)
-          raise ArgumentError, "must be called on a subclass of Holotheca" if self == Holotheca
-          raise ArgumentError, "#{other} is not a Holotheca" unless other < Holotheca
+          raise ArgumentError, "#{other} is not a Holarchy" unless other < Holarchy
 
           self.child_class = other
           other.parent_class = self
@@ -61,7 +61,8 @@ module BrowserOfBabel
         # Depth of this holotheca class in the holarchy, starting from 0.
         # @return [Integer]
         def depth
-          @parent_class ? @parent_class.depth + 1 : 0
+          parent_class = @parent_class
+          parent_class ? parent_class.depth + 1 : 0
         end
 
         # Get root holotheca class for the holarchy.
@@ -72,11 +73,17 @@ module BrowserOfBabel
 
         protected
 
-        # @return [Class]
-        attr_writer :parent_class
+        attr_writer :parent_class, :child_class
+      end
 
-        # @return [Class]
-        attr_writer :child_class
+      # @return [Holotheca, nil]
+      attr_reader :parent
+      # @return [Any]
+      attr_reader :identifier
+
+      def initialize(parent, identifier)
+        @parent = parent
+        @identifier = identifier
       end
 
       # Get holothecas from the top level to this one.
@@ -117,7 +124,10 @@ module BrowserOfBabel
         levels = levels.to_int
         raise ArgumentError, "levels must be non-negative" if levels.negative?
 
-        (levels.zero? || !parent) ? self : parent.up(levels - 1)
+        return self unless parent
+        return self if levels.zero?
+
+        parent.up(levels - 1)
       rescue NoMethodError => e
         raise unless e.name == :to_int
 
@@ -133,9 +143,10 @@ module BrowserOfBabel
       # @raise [InvalidHolothecaError] if there is no possible child holotheca
       # @raise [InvalidIdentifierError]
       def down(identifier)
-        raise InvalidHolothecaError, "nowhere to go down" unless self.class.child_class
+        child_class = self.class.child_class
+        raise InvalidHolothecaError, "nowhere to go down" unless child_class
 
-        self.class.child_class.new(self, identifier)
+        child_class.new(self, identifier)
       end
 
       # Go down several levels, following a string of +identifier+s.

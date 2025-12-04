@@ -1,0 +1,27 @@
+module BrowserOfBabel
+  class Locator
+    MAX_DEPTH: Integer
+    SEP: Regexp
+    HOLOTHECA_FORMAT: Regexp
+    TEXT_RANGE_FORMAT: Regexp
+    DEFAULT_FORMAT: Regexp
+
+    attr_reader format: Regexp
+
+    def initialize
+      : (format: Regexp) -> void
+
+    def call
+      : (String reference) -> (Holotheca | String)
+      | (String reference) -> void
+    
+    private
+
+    def extract_text
+      : (Page page, String text_range) -> String
+    def to_range
+      : (String expression) -> Range[Integer]
+    def invalid_reference
+      : () -> void
+  end
+end

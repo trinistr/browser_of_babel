@@ -10,6 +10,5 @@ module BrowserOfBabel
     FORMAT = "[a-z0-9]{1,3260}"
 
     identifier_format(/\A#{FORMAT}\z/o)
-    url_format lambda(&:to_s)
   end
 end

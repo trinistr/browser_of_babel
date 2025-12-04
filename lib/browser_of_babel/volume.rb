@@ -14,7 +14,8 @@ module BrowserOfBabel
     # @note This performs a network request to fetch a page.
     # @return [String]
     def title
-      @title ||= down(1).volume_title
+      # @type var _ : Page
+      @title ||= (_ = down(1)).volume_title
     end
   end
 end

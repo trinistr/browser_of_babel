@@ -1,4 +1,31 @@
 module BrowserOfBabel
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+  
+  # Base error class for BrowserOfBabel.
+  class Error < StandardError
+  end
+  # Holotheca does not support this identifier.
+  class InvalidIdentifierError < Error
+  end
+  # Trying to go between library holotheca levels incorrectly, e.g. from hex to shelf.
+  class InvalidHolothecaError < Error
+  end
+
+  class Library < Holotheca
+    def initialize
+      : (?Holotheca::_Identifier? identifier) -> void
+  end
+  class Hex < Holotheca
+    FORMAT: String
+  end
+  class Wall < Holotheca
+  end
+  class Shelf < Holotheca
+  end
+  class Volume < Holotheca
+    def title
+      : () -> String
+  end
+
+  # Page is in page.rbs
 end

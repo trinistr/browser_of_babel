@@ -35,14 +35,17 @@ module BrowserOfBabel
     # @raise [InvalidIdentifierError] if +reference+ contains invalid identifiers
     def call(reference)
       match = format.match(reference)
-      invalid_reference unless match
+      return invalid_reference unless match
 
+      reference = match[:holotheca] # : String
       identifiers =
-        match[:separator] ? match[:holotheca].split(match[:separator]) : match[:holotheca]
+        match[:separator] ? reference.split(match[:separator]) : reference
+      identifiers = Array(identifiers) # : Array[String]
       holotheca = Library.new.dig(*identifiers)
-      return holotheca unless match[:range]
+      return holotheca unless (range = match[:range])
+      return extract_text(holotheca, range) if holotheca.is_a?(Page)
 
-      extract_text(holotheca, match[:range])
+      invalid_reference
     rescue InvalidIdentifierError
       invalid_reference
     end
@@ -51,11 +54,12 @@ module BrowserOfBabel
 
     def extract_text(page, text_range)
       ranges = text_range.split(",").map { _1.include?("-") ? to_range(_1) : _1.to_i }
+      # @type var ranges : Array[Integer | Range[Integer]]
       ranges.map { page[_1] }.join
     end
 
     def to_range(expression)
-      expression.split("-").map(&:to_i).then { _1.._2 }
+      (_ = expression.split("-").map(&:to_i).then { _1.._2 }) # : Range[Integer]
     end
 
     def invalid_reference

@@ -58,8 +58,6 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
 
     it "only works on subclasses of Holotheca" do
       expect { primary >> Object }.to raise_error ArgumentError
-      expect { described_class >> primary }.to raise_error ArgumentError
-      expect { primary >> described_class }.to raise_error ArgumentError
     end
 
     it "allows to mention root itself" do

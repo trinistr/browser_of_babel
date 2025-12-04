@@ -19,7 +19,8 @@ module BrowserOfBabel
     # @note This performs a network request to fetch the page's content.
     # @return [String]
     def volume_title
-      title[/.+(?= \d+\z)/]
+      # @type var _ : String
+      _ = title[/.+(?= \d+\z)/]
     end
 
     # Get the page's title (volume's title + page number).
@@ -49,10 +50,10 @@ module BrowserOfBabel
     # @see String#[]
     def [](start_or_range, length = nil)
       range =
-        if length
-          (start_or_range - 1)..(start_or_range + length - 1)
-        elsif start_or_range.is_a?(Range)
+        if start_or_range.is_a?(Range)
           (start_or_range.begin - 1)..(start_or_range.end - 1)
+        elsif length
+          (start_or_range - 1)..(start_or_range + length - 1)
         else
           (start_or_range - 1)..(start_or_range - 1)
         end

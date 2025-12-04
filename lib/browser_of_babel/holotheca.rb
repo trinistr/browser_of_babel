@@ -10,16 +10,20 @@ module BrowserOfBabel
     include Holarchy
     extend Holarchy::ClassMethods
 
+    # Trivial formatter that just calls +#to_s+ on identifier.
+    # You probably want something more.
+    DEFAULT_URL_FORMATTER = -> { _1.to_s } # rubocop:disable Style/SymbolProc
+
     class << self
       # Get or set format validator for the holotheca's identifier.
       # @overload identifier_format
       # @overload identifier_format(format)
-      #   @param format [#===]
+      #   @param format [#===, nil]
       # @return [#===, nil]
       def identifier_format(format = (no_argument = true; nil)) # rubocop:disable Style/Semicolon
         return @identifier_format if no_argument
 
-        return @identifier_format = format if format.respond_to?(:===)
+        return @identifier_format = format if nil == format || format.respond_to?(:===) # rubocop:disable Style/YodaCondition
 
         raise ArgumentError, "invalid format validator #{format}"
       end
@@ -36,16 +40,16 @@ module BrowserOfBabel
       #
       # @return [Class, nil]
       def identifier_class
-        case @identifier_format
+        case (validator = @identifier_format)
         when Class
-          @identifier_format
+          validator
         when Regexp
           String
         when Range
-          @identifier_format.begin.class
+          validator.begin.class
         when Set
-          klass = @identifier_format.first.class
-          (@identifier_format.all? { klass === _1 }) ? klass : nil
+          klass = validator.first.class
+          (validator.all? { klass === _1 }) ? klass : nil
         else
           nil
         end
@@ -54,14 +58,19 @@ module BrowserOfBabel
       # Get or set string formatter for URLs.
       # @overload url_format
       # @overload url_format(holotheca)
-      #   @param format [#call]
-      # @return [#call, nil] format
+      #   @param format [#call, nil] formatter or +nil+ to reset to default
+      # @return [#call] formatter, {DEFAULT_URL_FORMATTER} if unset
       def url_format(format = (no_argument = true; nil)) # rubocop:disable Style/Semicolon
-        return @url_format if no_argument
+        return (@url_format ||= DEFAULT_URL_FORMATTER) if no_argument
 
-        return @url_format = format if format.respond_to?(:call)
-
-        raise ArgumentError, "invalid formatter #{format}"
+        if nil == format # rubocop:disable Style/YodaCondition
+          @url_format = DEFAULT_URL_FORMATTER
+        elsif format.respond_to?(:call)
+          # @type var format : _Formatter
+          @url_format = format
+        else
+          raise ArgumentError, "invalid formatter #{format}"
+        end
       end
 
       # Get the name of the holotheca,
@@ -73,11 +82,6 @@ module BrowserOfBabel
         @holotheca_name ||= name.split("::").last # rubocop:disable Style/IpAddresses
       end
     end
-
-    # @return [Holotheca, nil]
-    attr_reader :parent
-    # @return [Any]
-    attr_reader :identifier
 
     # @param parent [Holotheca] must be an instance of {.parent_class}
     # @param identifier [Any] must correspond to {.identifier_format};
@@ -110,7 +114,7 @@ module BrowserOfBabel
         if identifier
           "#{self.class.holotheca_name} #{identifier}"
         else
-          self.class.holotheca_name
+          self.class.holotheca_name.to_s
         end
       else
         identifier.to_s
@@ -139,7 +143,7 @@ module BrowserOfBabel
 
       raise(
         InvalidIdentifierError,
-        "identifier #{identifier.inspect} does not correspond to expected format for #{self.class}"
+        "identifier #{identifier} does not correspond to expected format for #{self.class}"
       )
     end
 
@@ -153,8 +157,10 @@ module BrowserOfBabel
       elsif klass === identifier
         identifier
       elsif klass == Symbol
+        # @type var identifier : _SymbolicIdentifier
         identifier.to_sym
       elsif klass == Integer
+        # @type var identifier : _IntegerIdentifier
         identifier.to_i
       else
         raise InvalidIdentifierError, "unknown conversion to #{klass}"

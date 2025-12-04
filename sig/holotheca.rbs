@@ -1,0 +1,136 @@
+module BrowserOfBabel
+  class Holotheca
+    # ---------------------
+    # Interfaces for arguments
+    # ---------------------
+    interface _Identifier
+      def to_s: () -> String
+    end
+    interface _SymbolicIdentifier
+      def to_sym: () -> Symbol
+    end
+    interface _IntegerIdentifier
+      def to_i: () -> Integer
+    end
+    type identifier = _Identifier | (_Identifier & _SymbolicIdentifier) | (_Identifier & _IntegerIdentifier)
+
+    interface _Validator
+      def ===
+        : (untyped other) -> bool
+      def respond_to?
+        : (Symbol name) -> bool
+    end
+    interface _Formatter
+      def call
+        : (_Identifier other) -> String
+      def respond_to?
+        : (Symbol name) -> bool
+    end
+
+    # ---------------------
+    # Constants
+    # ---------------------
+    DEFAULT_URL_FORMATTER: ^(_Identifier identifier) -> String
+
+    # ---------------------
+    # Class methods
+    # ---------------------
+    attr_reader self.parent_class: singleton(Holotheca)?
+    attr_reader self.child_class: singleton(Holotheca)?
+
+    def self.identifier_format
+      : () -> _Validator?
+      | (_Validator? format) -> _Validator?
+    self.@identifier_format: _Validator?
+
+    def self.identifier_class
+      : () -> Class?
+
+    def self.url_format
+      : () -> _Formatter
+      | (_Formatter? format) -> _Formatter
+    self.@url_format: _Formatter
+
+    def self.holotheca_name
+      : () -> String?
+    self.@holotheca_name: String?
+
+    def self.holarchy
+      : (singleton(Holotheca) holotheca) -> singleton(Holotheca)
+    def self.>>
+      : (singleton(Holotheca) other) -> singleton(Holotheca)
+    def self.depth
+      : () -> Integer
+    def self.root
+      : () -> singleton(Holotheca)
+    
+    # protected
+
+    def self.parent_class=
+      : (singleton(Holotheca)) -> singleton(Holotheca)
+    def self.child_class=
+      : (singleton(Holotheca)) -> singleton(Holotheca)
+
+
+    # ---------------------
+    # Instance methods
+    # ---------------------
+    attr_reader parent: Holotheca?
+    attr_reader identifier: _Identifier
+
+    def initialize
+      : (Holotheca parent, identifier) -> void
+
+    def path
+      : () -> Array[Holotheca]
+    @path: Array[Holotheca]
+
+    def path_identifiers
+      : () -> Array[_Identifier]
+
+    def depth
+      : () -> Integer
+    @depth: Integer
+
+    def root
+      : () -> Holotheca
+    @root: Holotheca
+
+    def up
+      : () -> Holotheca
+      | (Integer levels) -> Holotheca
+    def down
+      : (_Identifier identifier) -> Holotheca
+    def dig
+      : (*_Identifier identifiers) -> Holotheca
+      #| (nil) -> self
+
+    def to_url_part
+      : () -> String
+    def to_url
+      : () -> String
+
+    def to_s_part
+      : () -> String
+    def to_s
+      : () -> String
+    
+    private
+
+    def check_parent
+      : (Holotheca? parent) -> Holotheca?
+    def check_identifier
+      : (identifier) -> identifier
+    def convert_identifier
+      : (identifier) -> identifier
+    def enumerate_parents
+      : () -> Enumerator[self, self]
+
+    # Stubbed definitions to silence Steep's warnings.
+    # Method signatures are above, directly in Holotheca.
+    module Holarchy
+      module ClassMethods
+      end
+    end
+  end
+end
