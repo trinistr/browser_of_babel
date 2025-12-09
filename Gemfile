@@ -11,6 +11,9 @@ gemspec
 # For running tasks
 gem "rake", require: false
 
+# Fixed version for OpenSSL 3.6.0.
+gem "openssl", "~> 3.3", ">= 3.3.1"
+
 group :test do
   # Testing framework
   gem "rspec", require: false
