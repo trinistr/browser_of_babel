@@ -58,14 +58,26 @@ RSpec.describe BrowserOfBabel::Locator, :aggregate_failures do
   end
 
   context "if given an invalid reference" do
-    it "raises ArgumentError if reference does not match format" do
-      expect { locator.call("2.abz0.2") }.to raise_error ArgumentError, "reference is invalid"
-      expect { locator.call("2abz0/2") }.to raise_error ArgumentError, "reference is invalid"
+    it "raises InvalidIdentifierError if reference does not match format" do
+      expect { locator.call("2.abz0.2") }.to raise_error(
+        BrowserOfBabel::InvalidIdentifierError, "reference is invalid"
+      )
+      expect { locator.call("2abz0/2") }.to raise_error(
+        BrowserOfBabel::InvalidIdentifierError, "reference is invalid"
+      )
     end
 
-    it "raises ArgumentError if identifier is impossible" do
+    it "raises InvalidIdentifierError if identifier is impossible" do
       # Wall 8 does not exist.
-      expect { locator.call("2abz0.8") }.to raise_error ArgumentError, "reference is invalid"
+      expect { locator.call("2abz0.8") }.to raise_error(
+        BrowserOfBabel::InvalidIdentifierError, /does not correspond to expected format/
+      )
+    end
+
+    it "raises InvalidHolothecaError if text ranges are set on a non-page" do
+      expect { locator.call("2abz0.2.[1-5]") }.to raise_error(
+        BrowserOfBabel::InvalidHolothecaError, "text can only be extracted from a page"
+      )
     end
   end
 
@@ -77,7 +89,9 @@ RSpec.describe BrowserOfBabel::Locator, :aggregate_failures do
 
     it "follows the format" do
       expect(result).to be_a BrowserOfBabel::Hex
-      expect { locator.call("2123.2") }.to raise_error ArgumentError, "reference is invalid"
+      expect { locator.call("2123.2") }.to raise_error(
+        BrowserOfBabel::InvalidIdentifierError, "reference is invalid"
+      )
     end
 
     context "and using a custom separator" do

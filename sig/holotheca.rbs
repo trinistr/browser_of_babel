@@ -5,6 +5,7 @@ module BrowserOfBabel
     # ---------------------
     interface _Identifier
       def to_s: () -> String
+      def inspect: () -> String
     end
     interface _SymbolicIdentifier
       def to_sym: () -> Symbol

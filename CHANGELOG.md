@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Next]
 
 **Added**
+- `BrowserOfBabel::Randomizer` for generating random holothecas (or just their identifiers).
 - `Volume#title`.
 - Pattern matching of holothecas with array patterns via `Holotheca#path_identifers`, aliased as `#deconstruct`.
+- `Locator#from_identifiers`, accepting a list of identifiers and an array of ranges to extract text.
 
 **Changed**
 - [BREAKING] Rename `browse_babel` executable to `browser_of_babel` for consistency.

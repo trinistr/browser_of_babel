@@ -9,19 +9,26 @@ module BrowserOfBabel
     attr_reader format: Regexp
 
     def initialize
-      : (format: Regexp) -> void
+      : (?format: Regexp) -> void
 
     def call
       : (String reference) -> (Holotheca | String)
       | (String reference) -> void
+    alias from_string call
+
+    def from_identifiers
+      : (*(String | Integer) identifiers, ?ranges: Array[(Integer | Range[Integer])]?) -> (Holotheca | String)
+      | (*(String | Integer) identifiers, ?ranges: untyped) -> void
     
     private
 
-    def extract_text
-      : (Page page, String text_range) -> String
+    def extract_ranges
+      : (String? text_range) -> String?
     def to_range
       : (String expression) -> Range[Integer]
     def invalid_reference
+      : () -> void
+    def invalid_holotheca
       : () -> void
   end
 end

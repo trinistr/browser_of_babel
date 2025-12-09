@@ -1,0 +1,23 @@
+module BrowserOfBabel
+  class Randomizer
+    MAX_HEX: Integer
+
+    @random: Random
+    @locator: Locator
+
+    def initialize
+      : (?random: Random) -> void
+    
+    def hex_identifier: () -> String
+    def wall_identifier: () -> Integer
+    def shelf_identifier: () -> Integer
+    def volume_identifier: () -> Integer
+    def page_identifier: () -> Integer
+
+    def hex: () -> Hex
+    def wall: () -> Wall
+    def shelf: () -> Shelf
+    def volume: () -> Volume
+    def page: () -> Page
+  end
+end

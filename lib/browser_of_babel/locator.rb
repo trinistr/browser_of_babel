@@ -22,17 +22,23 @@ module BrowserOfBabel
       @format = format
     end
 
-    # Find a holotheca from a reference, possibly extracting text from a page.
+    # Find a holotheca from a string reference, possibly extracting text from a page.
     # @example
     #   Locator.new.call("2ab.2.4.16.121")
     #   # => Library, Hex 2ab, Wall 2, Shelf 4, Volume 16, Page 121
     # @example
-    #   Locator.new.call("xeh1.2.3.4.5.[1-20]")
+    #   locator = Locator.new
+    #   locator.call("xeh1.2.3.4.5.[1-20]")
     #   # => blyxpmaggmbnbri ,xso
+    #   locator.call("xeh1.2.3.4.5.[1-10,12,15,18-20]")
+    #   # => blyxpmaggmnixso
     # @param reference [String]
-    # @return [Holotheca]
-    # @raise [ArgumentError] if +reference+ does not match +format+
+    # @return [Holotheca] if reference does not contain text ranges
+    # @return [String] if reference points to a page and contains text ranges
+    # @raise [ArgumentError] if +reference+ does not match expected +format+
     # @raise [InvalidIdentifierError] if +reference+ contains invalid identifiers
+    # @raise [InvalidHolothecaError] if +reference+ contains text ranges,
+    #   but does not point to a page
     def call(reference)
       match = format.match(reference)
       return invalid_reference unless match
@@ -41,21 +47,36 @@ module BrowserOfBabel
       identifiers =
         match[:separator] ? reference.split(match[:separator]) : reference
       identifiers = Array(identifiers) # : Array[String]
-      holotheca = Library.new.dig(*identifiers)
-      return holotheca unless (range = match[:range])
-      return extract_text(holotheca, range) if holotheca.is_a?(Page)
+      from_identifiers(*identifiers, ranges: extract_ranges(match[:range]))
+    end
 
-      invalid_reference
-    rescue InvalidIdentifierError
-      invalid_reference
+    alias from_string call
+
+    # Find a holotheca from an array of identifiers, possibly extracting text from a page.
+    # @param identifiers [Array<String, Integer>]
+    # @param ranges [Array<Integer, Range<Integer>>]
+    # @return [Holotheca] if +ranges+ is +nil+
+    # @return [String] if +identifiers+ point to a page, and +ranges+ contain text ranges
+    # @raise [ArgumentError] if +ranges+ contain an invalid range
+    # @raise [InvalidIdentifierError] if +identifiers+ are invalid
+    # @raise [InvalidHolothecaError] if +identifiers+ do not point to a {Page},
+    #   but +ranges+ is not +nil+
+    def from_identifiers(*identifiers, ranges: nil)
+      holotheca = Library.new.dig(*identifiers)
+      return holotheca unless ranges
+      return invalid_holotheca unless holotheca.is_a?(Page)
+
+      ranges = Array(ranges)
+      ranges.map { holotheca[_1] }.join
     end
 
     private
 
-    def extract_text(page, text_range)
-      ranges = text_range.split(",").map { _1.include?("-") ? to_range(_1) : _1.to_i }
-      # @type var ranges : Array[Integer | Range[Integer]]
-      ranges.map { page[_1] }.join
+    def extract_ranges(text_range)
+      return unless text_range
+
+      # @type var _ : Array[Integer | Range[Integer]]
+      _ = text_range.split(",").map { _1.include?("-") ? to_range(_1) : _1.to_i }
     end
 
     def to_range(expression)
@@ -63,7 +84,11 @@ module BrowserOfBabel
     end
 
     def invalid_reference
-      raise ArgumentError, "reference is invalid", caller
+      raise InvalidIdentifierError, "reference is invalid", caller
+    end
+
+    def invalid_holotheca
+      raise InvalidHolothecaError, "text can only be extracted from a page", caller
     end
   end
 end

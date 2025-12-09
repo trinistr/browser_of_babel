@@ -197,7 +197,17 @@ RSpec.describe BrowserOfBabel::Holotheca, :aggregate_failures do
         end
       end
 
-      context "when argument does not respond to #call" do
+      context "when argument is nil" do
+        before { primary.url_format(-> { _1.to_s * 2 }) }
+
+        it "resets URI formatter to the default" do
+          expect(primary.url_format).not_to eq primary::DEFAULT_URL_FORMATTER
+          primary.url_format(nil)
+          expect(primary.url_format).to eq primary::DEFAULT_URL_FORMATTER
+        end
+      end
+
+      context "when argument is not nil and does not respond to #call" do
         let(:format) { Object.new }
 
         it "raises ArgumentError" do

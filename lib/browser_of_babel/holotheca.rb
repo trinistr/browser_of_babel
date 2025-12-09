@@ -143,7 +143,7 @@ module BrowserOfBabel
 
       raise(
         InvalidIdentifierError,
-        "identifier #{identifier} does not correspond to expected format for #{self.class}"
+        "identifier #{identifier.inspect} does not correspond to expected format for #{self.class}"
       )
     end
 

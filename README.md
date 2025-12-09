@@ -38,6 +38,21 @@ gem "browser_of_babel", github: "trinistr/browser_of_babel"
 > with no in-built caching or throttling.
 > **Do not abuse this browser!**
 
+### CLI
+
+This gem includes a CLI executable `browser_of_babel`. It accepts any number of arguments and calls `BrowserOfBabel::Locator#call` with each one, printing each result on a separate line.
+
+For example:
+```sh
+$ browser_of_babel "hex3.1.2.3.5.[10-20,30-40]" "hex.hex" "000.4.5.32.410.[1]" "100.1.2.3.4"
+qkthjg,i.gymngbbmxsdsv
+BrowserOfBabel::InvalidIdentifierError: reference is invalid
+z
+Library of Babel, Hex 100, Wall 1, Shelf 2, Volume 3, Page 4
+```
+
+For further information see next section.
+
 ### `BrowserOfBabel::Locator`
 
 The most straightforward way to use `BrowserOfBabel` is to use `Locator`
@@ -97,6 +112,37 @@ slash_reference_format =
 locator = BrowserOfBabel::Locator.new(format: slash_reference_format)
 locator.call("123az/1/2/3/4/[12-15]")
 # => "p cn"
+```
+
+### `BrowserOfBabel::Randomizer`
+
+`Randomizer` can be used to generate random identifiers and concrete parts. It has two sets of methods:
+- `#hex_identifier`, `#wall_identifier`, `#shelf_identifier`, `#volume_identifier`, `#page_identifier` all generate a single identifier suitable for the corresponding unit (holotheca);
+- `#hex`, `#wall`, `#shelf`, `#volume`, `#page` all generate a list of randomized units upto the corresponding holotheca; for instance `#shelf` will generate a random hex, random wall and random shelf.
+
+Generate a random page:
+```ruby
+randomizer = BrowserOfBabel::Randomizer.new
+randomizer.page
+  # =>
+  # #<BrowserOfBabel::Page:0x00007fdd4bfef6e8
+  #  @identifier=64,
+  #  @parent=
+  #   #<BrowserOfBabel::Volume:0x00007fdd4bfef968
+  #    @identifier=6,
+  #    ...
+```
+
+Go to a random wall in a selected hex:
+```ruby
+hex = BrowserOfBabel::Library.new.dig("abcde")
+hex.down(randomizer.wall_identifier)
+```
+
+Get a specific volume from a random shelf:
+```ruby
+shelf = randomizer.shelf
+shelf.down(7)
 ```
 
 ## Development
