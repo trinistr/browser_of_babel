@@ -6,7 +6,7 @@ require "browser_of_babel"
 if ARGV.empty? || ARGV.include?("-h") || ARGV.include?("--help")
   puts <<~TEXT
     Usage:
-      browse_babel "hex3.1.2.3.5.[10-100,200-300]" "000.4.5.32.410.1"
+      browser_of_babel "hex3.1.2.3.5.[10-100,200-300]" "000.4.5.32.410.[1]"
   TEXT
   return
 end
@@ -15,4 +15,8 @@ if ARGV.include?("-v") || ARGV.include?("--version")
   return
 end
 
-puts(ARGV.map { BrowserOfBabel::Locator.new.call(_1) })
+ARGV.map do |arg|
+  puts BrowserOfBabel::Locator.new.call(arg.strip)
+rescue BrowserOfBabel::Error => e
+  warn "#{e.class}: #{e.message}"
+end
