@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    browser_of_babel (0.1.0)
+    browser_of_babel (0.2.0)
       net-http (~> 0.6)
       nokogiri (~> 1.0)
 

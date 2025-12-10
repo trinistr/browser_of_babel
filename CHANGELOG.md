@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+[Compare v0.2.0...main](https://github.com/trinistr/browser_of_babel/compare/v0.2.0...main)
+
+## [v0.2.0] — 2025-12-10
+
 **Added**
 - `BrowserOfBabel::Randomizer` for generating random holothecas (or just their identifiers).
 - `Volume#title`.
@@ -58,6 +62,7 @@ First implementation.
 - `InterpreterOfBabel::Finder` with `#call` to find page by full address.
 
 [Next]: https://github.com/trinistr/browser_of_babel/tree/main
+[v0.2.0]: https://github.com/trinistr/browser_of_babel/tree/v0.2.0
 [v0.1.0]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0
 [v0.1.0-alpha2]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0-alpha2
 [v0.1.0-alpha1]: https://github.com/trinistr/browser_of_babel/tree/v0.1.0-alpha1
