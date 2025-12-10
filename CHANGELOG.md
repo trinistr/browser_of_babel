@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+**Changed**
+- `Locator#from_string`/`#call` (and CLI) now accepts text ranges without an extra seprator. This is now the main format.
+
+**Deprecated**
+- Specifying text ranges in `Locator#from_string` *with* an extra separator.
+- Specifying text index without brackets.
+
 [Compare v0.2.0...main](https://github.com/trinistr/browser_of_babel/compare/v0.2.0...main)
 
 ## [v0.2.0] — 2025-12-10
@@ -16,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Volume#title`.
 - Pattern matching of holothecas with array patterns via `Holotheca#path_identifers`, aliased as `#deconstruct`.
 - `Locator#from_identifiers`, accepting a list of identifiers and an array of ranges to extract text.
+- `Locator#from_string` alias for `#call`.
 
 **Changed**
 - [BREAKING] Rename `browse_babel` executable to `browser_of_babel` for consistency.

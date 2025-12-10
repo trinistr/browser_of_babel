@@ -6,7 +6,7 @@ require "browser_of_babel"
 if ARGV.empty? || ARGV.include?("-h") || ARGV.include?("--help")
   puts <<~TEXT
     Usage:
-      browser_of_babel "hex3.1.2.3.5.[10-100,200-300]" "000.4.5.32.410.[1]"
+      browser_of_babel "hex3.1.2.3.5[10-100,200-300]" "000.4.5.32.410[1]"
   TEXT
   return
 end

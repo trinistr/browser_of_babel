@@ -44,7 +44,7 @@ This gem includes a CLI executable `browser_of_babel`. It accepts any number of 
 
 For example:
 ```sh
-$ browser_of_babel "hex3.1.2.3.5.[10-20,30-40]" "hex.hex" "000.4.5.32.410.[1]" "100.1.2.3.4"
+$ browser_of_babel "hex3.1.2.3.5[10-20,30-40]" "hex.hex" "000.4.5.32.410[1]" "100.1.2.3.4"
 qkthjg,i.gymngbbmxsdsv
 BrowserOfBabel::InvalidIdentifierError: reference is invalid
 z
@@ -67,7 +67,7 @@ locator.call("123az.1.2.3.4.5")
 # => "q"
 
 # Take characters 1-25 from the same page:
-locator.call("123az.1.2.3.4.[1-25]")
+locator.call("123az.1.2.3.4[1-25]")
 # => "yrijqencpcup cnqf,gdaplod"
 
 # Range syntax works only for characters, this is invalid!
@@ -110,7 +110,7 @@ though be aware that it has assumptions about named captures:
 slash_reference_format =
   Regexp.new(BrowserOfBabel::Locator::DEFAULT_FORMAT.to_s.gsub("\\.", "/"))
 locator = BrowserOfBabel::Locator.new(format: slash_reference_format)
-locator.call("123az/1/2/3/4/[12-15]")
+locator.call("123az/1/2/3/4[12-15]")
 # => "p cn"
 ```
 
@@ -143,6 +143,14 @@ Get a specific volume from a random shelf:
 ```ruby
 shelf = randomizer.shelf
 shelf.down(7)
+```
+
+`Randomizer` can be initialized with a custom instance of `Random` for reproducible randomness:
+```ruby
+randomizer = BrowserOfBabel::Randomizer.new(random: Random.new(123))
+randomizer.page_identifier # => 366
+randomizer = BrowserOfBabel::Randomizer.new(random: Random.new(123))
+randomizer.page_identifier # => 366
 ```
 
 ## Development

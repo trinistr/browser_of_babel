@@ -30,11 +30,20 @@ RSpec.describe BrowserOfBabel::Locator, :aggregate_failures do
   end
 
   context "when given a reference with a text range" do
-    let(:reference) { "2abz0.2.4.5.12.[5-28]" }
+    let(:reference) { "2abz0.2.4.5.12[5-28]" }
 
     it "extracts text from a page" do
       expect(result).to be_a String
       expect(result).to eq "efghijklmnopqrstuvwxyz12"
+    end
+
+    context "with an extra separator" do
+      let(:reference) { "2abz0.2.4.5.12.[5-28]" }
+
+      it "extracts text from a page" do
+        expect(result).to be_a String
+        expect(result).to eq "efghijklmnopqrstuvwxyz12"
+      end
     end
   end
 
@@ -49,7 +58,7 @@ RSpec.describe BrowserOfBabel::Locator, :aggregate_failures do
   end
 
   context "when given a reference with several text ranges" do
-    let(:reference) { "2abz0.2.4.5.12.[5-28,30,41-45]" }
+    let(:reference) { "2abz0.2.4.5.12[5-28,30,41-45]" }
 
     it "extracts text from a page, combining all ranges" do
       expect(result).to be_a String
@@ -75,7 +84,7 @@ RSpec.describe BrowserOfBabel::Locator, :aggregate_failures do
     end
 
     it "raises InvalidHolothecaError if text ranges are set on a non-page" do
-      expect { locator.call("2abz0.2.[1-5]") }.to raise_error(
+      expect { locator.call("2abz0.2[1-5]") }.to raise_error(
         BrowserOfBabel::InvalidHolothecaError, "text can only be extracted from a page"
       )
     end

@@ -10,7 +10,7 @@ module BrowserOfBabel
     HOLOTHECA_FORMAT =
       /(?<holotheca>#{Hex::FORMAT}(?:(?<separator>#{SEP})\d+){0,#{MAX_DEPTH - 1}})/o
     TEXT_RANGE_FORMAT = /(?>(?<range>\d+)|\[(?<range>(?>\d+-\d+|\d+)(?:,\s*(?>\d+-\d+|\d+))*)\])/o
-    DEFAULT_FORMAT = /\A#{HOLOTHECA_FORMAT}(?:#{SEP}#{TEXT_RANGE_FORMAT})?\z/o
+    DEFAULT_FORMAT = /\A#{HOLOTHECA_FORMAT}(?:#{SEP}?#{TEXT_RANGE_FORMAT})?\z/o
 
     # @return [Regexp]
     attr_reader :format
@@ -28,9 +28,9 @@ module BrowserOfBabel
     #   # => Library, Hex 2ab, Wall 2, Shelf 4, Volume 16, Page 121
     # @example
     #   locator = Locator.new
-    #   locator.call("xeh1.2.3.4.5.[1-20]")
+    #   locator.call("xeh1.2.3.4.5[1-20]")
     #   # => blyxpmaggmbnbri ,xso
-    #   locator.call("xeh1.2.3.4.5.[1-10,12,15,18-20]")
+    #   locator.call("xeh1.2.3.4.5[1-10,12,15,18-20]")
     #   # => blyxpmaggmnixso
     # @param reference [String]
     # @return [Holotheca] if reference does not contain text ranges
