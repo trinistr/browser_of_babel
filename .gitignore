@@ -10,3 +10,6 @@
 
 # remote rubocop configuration
 .rubocop-*
+
+# lockfile
+Gemfile.lock
